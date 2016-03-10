@@ -1,0 +1,868 @@
+<div id="sales-report-data" class="cpanel shadow cpanel-info">
+	<div class="cpanel-heading">
+		Purchase Transactions...
+		
+		<a href="#" class="panel-close"><span class="glyphicon glyphicon-remove titlebar-icon pull-right"></span></a>
+  
+	 <button class="btn btn-default btn-sm pull-right" id="btn-filter"  type="button" >
+	<i class="fa fa-filter"> Filter </i> 
+	</button>
+	
+	<a href="#" id="export_to_excel"><img src="resources/Microsoft-Office-Excel-icon.png" width="24" class="pull-right"/></a>
+	
+</div>
+
+<!-- Filter content goes here , like selelcted  filter value -->
+    <div id="filter-content" class="custom-filter">   </div>
+
+	<div>
+		<table id="purchases-report-table" class="table table-bordered">
+			<thead>
+				<tr>
+					<th> </th>
+					<th>Invoice Date</th>
+					<th>Invoice #</th>
+					<th width="40%">Customer</th>
+					<th>CST_2.0</th>
+					<th>VAT_14.5</th>
+					<th>VAT_5.5</th>
+					<th >Amount</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td colspan="7" style="text-align: center"> <img src="resources/ajax-loader.gif" /> Loading... </td>
+				</tr>
+			</tbody>
+					<tfoot>
+				<tr>
+					<td></td>
+					<td colspan="2"></td>
+					<td class="right-align">Totals</td>
+					<td id="cst_2_0_total"></td>
+					<td id="vat_14_5_total"></td>
+					<td id="vat_5_5_total"></td>
+					<td id="amount_total"></td>
+					<td></td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+</div>
+
+	   
+	   <!--    div for filter content   -->
+	   
+		<div id="divfilter_pur"  title="Purchases Filter">
+		<table>
+			<tr>
+			<td>	<label for="from-date">From Date </label> </td>
+			<td> : <input 	class="custom-sridama" id="from-date"  type="text" size="12" /> </td>
+				
+				
+			<td>		<label for="to-date">To Date</label>  </td>
+			<td>	: <input class="custom-sridama" id="to-date"  type="text"
+				size="12" />  </td>
+				
+			</tr>
+			<tr> &nbsp; </tr>
+			
+			<tr>
+			<td>	<label for="cust-name">Cutomer  </label></td>
+			<td> :	<input class="custom-sridama" 	id="cust_name" type="text" size="18" />
+				<input class="custom-sridama" id="cust_id" type="hidden" size="18" /></td>
+			</tr>
+			
+			
+		
+			<tr>
+			  <td>  <label for="inv_from">Invoice From </label> </td>
+			<td> :	<input class="custom-sridama" id="inv_from" type="text" size="12" /></td>
+		
+			<td> 	<label for="inv_to">Invocie To  </label> </td>
+			<td>  :	<input class="custom-sridama" id="inv_to" type="text" size="12" /> </td>
+			</tr>
+	
+			<tr >
+			<td> 	<button type="submit" id="filter-submit" class="btn btn-success btn-sm pull-right">
+					Submit
+			</button> </td>
+			</tr>
+		</table>
+</div>
+		
+
+<script>
+
+	/**
+	 *   If branch is other than main branch , disables the select box
+	 */
+	var myBranch =  $.cookie("brCode");
+	console.log("branch id from cookie"+myBranch);
+	
+	 if ( myBranch !== '1' ) {
+		 
+			$('#to-branch').prop('disabled', true);
+	 }
+ 
+	$(function() {
+		var  object = new Object() ;
+				 
+		 //  Associating the filter content , so that we can assaign a value
+			$('#btn-filter').data('filter',object);
+		 
+		 
+		 /*
+		 *    Datatable for purchases report
+		 */   
+	      $("#purchases-report-table").dataTable({
+	    	  "bProcessing" : true ,
+			  "bServerSide" : true ,
+			  "bFilter" : true ,
+			  "sSearch" : true ,
+	
+			"sAjaxSource" : getRequestUrl(23) +"&data="+ JSON.stringify(object) ,
+		
+
+			"aaSorting": [[1, 'asc']] ,
+			
+			"aoColumns" : [
+			               null ,
+			               {
+					"mData" : "invoice_date"
+				}, {
+					"mData" : "pur_invoice_no",
+					 sClass : 'right-align'
+				},  {
+					"mData" : "cust_info.cust_name"
+				}, {
+					"mData" : "cst",
+					sClass : 'right-align'
+			   } , 
+				{
+					"mData" : "vat_frtn",
+						sClass : 'right-align'
+				} , {
+					"mData" : "vat_five",
+					sClass : 'right-align'
+			    }
+				, {
+					"mData" : "final_total",
+					sClass : 'right-align'
+				} ,
+				    null 
+				],
+			
+				"aoColumnDefs"	: [  {
+					  "aTargets" : [0],
+					  "bSearchable" : false ,
+					   sClass : 'center',
+					   "mData" : function(o) {
+					   return '<a  href="#" id="open-close" title="Details" class="fa fa-info-circle fa-fw" alt="" />';
+					}  },{
+						
+						  "aTargets" : [4],
+						  "bSearchable" : false ,
+					} ,{
+						
+						  "aTargets" : [5],
+						  "bSearchable" : false ,
+					} ,{
+						
+						  "aTargets" : [6],
+						  "bSearchable" : false ,
+					} ,
+					{
+						
+						  "aTargets" : [7],
+						  "bSearchable" : false ,
+					},
+					{  
+			        	   "aTargets" : [8],
+			        	   "bSearchable" : false ,
+							"mData" : function(source , type , val )  {
+							var colData = "<a href='#' class='action-edit'><i class='fa fa-edit' title='Edit Invoice'></i> </a> ";
+							/* colData += "<a href='#' class='action-print'><i class='fa fa-print' title='Print Invoice'></i> </a>"; */
+							colData += "<a href='#' class='action-reject'><i class='fa fa-trash-o' title='Reject Invoice'></i> </a>";
+							return colData;
+						} 
+						  }
+				
+				   ],
+			
+			"fnCreatedRow" : function(nRow, aData, iDataIndex) {
+				invoiceTooltip($("td:eq(0)", nRow), aData.invoice_no);
+				invoiceEdit($("td:last a.action-edit", nRow) , aData ) ;
+				invoicePrint ($("td:last a.action-print", nRow), aData ) ;
+				invoiceReject ($("td:last a.action-reject", nRow), aData ) ;
+			},
+			
+			"fnServerData" : function(sSource, aoData, fnCallback, oSettings) {
+				oSettings.jqXHR = $.ajax({
+					"dataType" : "json",
+					"url" : sSource,
+				//	"data" :{ data : JSON.stringify(object) },
+					"data" : aoData ,
+					"success" : function(data) {
+						//do your stuff here
+					//	data = transformSales2Array(data);
+						//finally call the original fn.
+						fnCallback(data);
+					}
+				});
+			},
+			"fnFooterCallback": function(nRow, aaData, iStart, iEnd, aiDisplay) {
+				var cst_2_0_total = 0;
+				var vat_14_5_total = 0;
+				var vat_5_5_total = 0;
+				var amount_total = 0;
+				for (var i = 0; i < aaData.length; i++) {
+					cst_2_0_total += parseFloat(aaData[i].cst);
+					vat_14_5_total += parseFloat(aaData[i].vat_frtn);
+					vat_5_5_total += parseFloat(aaData[i].vat_five);
+					amount_total += parseFloat(aaData[i].final_total);
+				}
+				$("#purchases-report-table tfoot tr td#cst_2_0_total").text(cst_2_0_total.toFixed(2));
+				$("#purchases-report-table tfoot tr td#vat_14_5_total").text(vat_14_5_total.toFixed(2));
+				$("#purchases-report-table tfoot tr td#vat_5_5_total").text(vat_5_5_total.toFixed(2));
+				$("#purchases-report-table tfoot tr td#amount_total").text(amount_total.toFixed(2));
+			}
+		});
+	});
+	
+	
+	/**
+	 *	Converts purchases-report.json data to array form recognizable by dataTables. 
+	 */
+	function transformSales2Array(data) {
+		var result = new Object();
+		result.aaData = [];
+		for(var i=0; i<data.length; i++) {
+			var array = [];
+			array.push(data[i].invoice_no);
+			array.push(i+1);
+			array.push(data[i].invoice_date.split(" ")[0]);
+			array.push(data[i].pur_invoice_no);
+			array.push(data[i].cust_info.cust_name);
+			array.push(data[i].vat_frtn.toFixed(2));
+			array.push(data[i].vat_five.toFixed(2));
+			array.push(data[i].final_total.toFixed(2));
+			
+			
+			result.aaData.push(array);
+		}
+		
+		return result;
+	}
+	
+	
+	$(document).ready(function () {
+      /*
+       *   Dialog for filtering the  filter criteria
+       */
+		$("#divfilter_pur").dialog({
+    		autoOpen: false,
+    		show: 'slide',
+    		resizable: 'true' ,
+    		position: 'center',
+    		stack: true,
+    		height: 'auto',
+    		width: 'auto',
+    		modal: true
+		});
+      
+	/*
+	 * on clicking filter button we can see  the filter poping up 
+	 */		
+	 $("#btn-filter").on("click", function() {
+	 			$("#from-date").val("") ;
+				$("#to-date").val("") ;
+				$("#cust_id").val(""); 
+				$("#cust_name").val("");
+				$("#inv_from").val("");
+				$("#inv_to").val("");
+			$('#filter-content').text('');
+			
+			var date = new Date();
+			 date.setDate(date.getDate()-30);
+			var dd = date.getDate();
+			var mm = date.getMonth() + 1;
+			//January is 0!
+
+		   	
+			var yyyy = date.getFullYear();
+			if (dd < 10) {
+				dd = '0' + dd;
+			}
+			if (mm < 10) {
+				mm = '0' + mm;
+			}
+			//today = mm + '/' + dd + '/' + yyyy;
+			date = dd + "/" + mm + "/" + yyyy;
+			$("#from-date").val(date);
+			$("#to-date").val(today());
+			
+			
+			removeMessage();	
+			$("#divfilter_pur").dialog('open'); 
+			 
+      });
+      
+      
+      $(document).keyup(function(e) {
+ 	 //	if (e.keyCode == 13) { $('.save').click(); }     // enter
+  		if (e.keyCode == 27) {
+  			removeMessage();
+  			}   // esc
+	 });
+
+	 });  // End of ready function
+	 
+	 
+	//  By default giving current months reports .
+		$(function() {
+			var monthNames = [ "January", "February", "March", "April", "May", "June",
+			                   "July", "August", "September", "October", "November", "December" ];
+			var date = new Date();
+			var msg =  "Showing the Purchase Reporsts of the Month "+monthNames[date.getMonth()] +", "+date.getFullYear();
+			$('#filter-content').append(msg);
+		});
+		
+		
+		$(function() {
+			$('#filter-submit').on("click", function() {
+	            debugger ; 
+				var filterData = getFilterData($(this));
+				if (! validate(filterData)) {
+					return;
+				}
+				updateReport(filterData);
+				//reloadTable(values);
+					// finally calling the reload function for  refreshig the table for current filter
+			
+			});
+			//  End click function
+			
+			 $("#export_to_excel").on("click", function(e) {
+					debugger ;
+					var filter = {};
+				if ($("#btn-filter").data().filterData !== undefined) {
+					  filter = $("#btn-filter").data().filterData ;
+				}
+					
+					$.ajax({
+						url: getRequestUrl(34),
+						type: "POST",
+						dataType: "json",
+						data: { data: JSON.stringify(filter) }, 
+						success: function(data) {
+						if (data.result == 0 ) {
+							var  xl_url = "/eazytrack/tmp/"+data.path ;
+							window.open(xl_url, 'Sale Report # ' , 'window settings');
+						}
+							
+						},
+						error: function(xhr, status, error) {
+						   showMessage('Unable to Export '+status+":"+error);
+						}
+					});
+				});
+			});
+
+	/**
+	 * Returns the data entered into filter dialog as a json string.
+	 */
+	function getFilterData() {
+		debugger ;
+		var values = new Object();if($("#from-date").val()!=="") {
+		values.fdate = convert2outputDt1($("#from-date").val()); 
+		}else {
+			values.fdate ="";
+		}
+			
+		if($("#to-date").val()!=="") {
+		values.tdate = convert2outputDt1($("#to-date").val());
+		} else {
+			values.tdate="";
+		}
+		values.cust_id = $("#cust_name").data("customer").id;
+		values.cust_name = $("#cust_name").data("customer").name ;
+		values.inv_from = $("#inv_from").val();
+		values.inv_to = $("#inv_to").val();
+
+//		//calling validation method to validate all the values are proper or not
+//		if (! validate(values)) {
+//			return;
+//		} else {
+			$("#from-date").val("");
+			$("#to-date").val("");
+			$("#cust_id").val("");
+			$("#cust_name").val("");
+			$("#inv_from").val("");
+			$("#inv_to").val("");
+			$("#divfilter_pur").dialog('close');
+
+			var branch_id = '';
+
+			if ($('#to-branch').val() !== null && $('#to-branch').val() !== "") {
+				values.branch = $('#to-branch').val();
+				branch_id = $('#to-branch').val();
+			} else {
+				values.branch = -1;
+				branch_id = $.cookie("brCode");
+			}
+			var resmsg = "";
+			resmsg += "Purchase Reports  \n";
+			if (values.fdate !== "" && values.tdate !== "")
+				resmsg += "Between Dates  " + values.fdate + "--" + values.tdate + "\n , ";
+
+			if (values.cust_name !== "")
+				resmsg += "To Customer  " + values.cust_name + " \n , ";
+
+			if (values.inv_from !== "" && values.inv_to !== "")
+				resmsg += "Invoice Nos from " + values.inv_from + " to " + values.inv_to + "\n , ";
+
+			resmsg += "of Branch  " + getBranchName(parseInt(branch_id));
+
+			alert(resmsg);
+			$('#filter-content').append(resmsg);
+			
+			// Store the filter expression, for later use (especially when export is used.)
+			//$("#btn-filter").data("filter", values);
+			
+			return values;
+	}
+
+ 
+
+	/*
+	 * this is a datatable plugin ,  to work with fnReloadAjax
+	 * for filtering options
+	 */
+
+	 $.fn.dataTableExt.oApi.fnReloadAjax = function ( oSettings, sNewSource ) {
+		 
+		  if ( typeof sNewSource != 'undefined' ) {
+		    oSettings.sAjaxSource = sNewSource;
+		  }
+		 
+		  this.fnClearTable( this );
+		  this.oApi._fnProcessingDisplay( oSettings, true );
+		 
+		  $.getJSON( oSettings.sAjaxSource, null, $.proxy(function(json) {
+		 
+		 debugger;
+		    for ( var i=0 ; i<json.aaData.length; i++ ) {
+		    this.oApi._fnAddData( oSettings, json.aaData[i] );
+		    }
+		 
+		    oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
+		    this.fnDraw( this );
+		    this.oApi._fnProcessingDisplay( oSettings, false );
+		  }, this));
+		};
+
+ 
+		/*
+		 * if admin selects different branch for viewing sales report, values will be displayed
+		 */
+		$("#to-branch").change(function() {
+			var result = new Object();
+			result.branch = $( "#to-branch" ).val();
+			reloadTable(result);
+			});
+		
+		
+		/*
+		 *   Date picker function for asking for the date
+		 */
+		$(function() {
+			$("#from-date").datepicker({
+				   changeMonth: true,
+				   changeYear: true,
+				   showOn: "button",
+				   buttonImage: "resources/calendar.gif",
+				   buttonImageOnly: true
+				  });
+			$("#from-date").datepicker("option", "dateFormat", "dd/mm/yy");
+			$("#to-date").datepicker({
+				   changeMonth: true,
+				   changeYear: true,
+				   showOn: "button",
+				   buttonImage: "resources/calendar.gif",
+				   buttonImageOnly: true
+				  });
+			$("#to-date").datepicker("option", "dateFormat", "dd/mm/yy");
+		});
+		
+		   /**
+		 * Add typeahead capability to cust-name field.
+		 */
+		$("#cust_name").typeahead({
+			name : "customers",
+			remote : getRequestUrl(2),
+			limit : 10,
+			template : ["<p>{{name}}, {{phone1}}</p>"].join(""),
+			header : "<div class='bottom-border hint-header'><h5>Customer , Phone </h5></div>",
+			engine : Hogan,
+		});
+	   
+		$("#cust_name").bind('typeahead:selected', function( obj, datum, name ) {
+			console.log("selection triggered");
+			$("#cust_name").val(datum.name);
+			$("#cust-phone").val(datum.phone2);
+			$("#cust_name").data("customer", datum );
+		});
+		
+		/*
+		* adding  select2 to to-barnch select box
+		*/
+		$("#to-branch").select2({
+			width : "element"
+		});
+	
+		
+	 	/*
+		*   Click event for the update invoice button 
+		*   Need to open the sale edit page for the current invoice no
+		*/
+	//	$("#purchases-report-table").on("click", "td:nth-child(9)", function() {
+		function invoiceEdit ( element , aData )  {
+			//TODO have to give the full edit options where invoice can be edited
+				var nTr = $(this).parents('tr')[0];  
+				// var aData = oTable.fnGetData( nTr );
+				 var aData = aData ;
+		   var obj = new Object();
+	 	       obj.inv_no = aData.invoice_no;    // hidden invoice number at this position for details
+	 	       obj.txn_type = 'purchase';
+	 	       
+	 	      $(element).on("click" , function() { 
+	 	       	if ( $('#to-branch').val() !== null && $('#to-branch').val() !== "" )  {
+				  obj.branch = $( '#to-branch' ).val();
+			    } else {
+				  obj.branch = $.cookie("brCode");
+			 }
+			$.cookie("obj", JSON.stringify(obj) ) ;     // storing value to cookie, to access it in new-sale-new1.html
+			$.cookie("action", 'update') ;     //action for update
+	    	$("#canvas").load("new-purchases-new1.html"); //new-purchases-new1.html 
+		}); // End of on click
+	} // End of Function
+		
+	   /*
+		*   Click event for the print invoice button 
+		*   Gives the invoice PDF  for print or save 
+		*/
+	//	$("#purchases-report-table").on("click", "td:nth-child(10)", function() {
+		function invoicePrint( element , aData ) {
+			var nTr = $(this).parents('tr')[0] ;  
+		//	 var aData = oTable.fnGetData( nTr );
+			 var aData = aData ;
+	    var branch = '' ;
+	       
+	     $(element).on("clcick" , function() {
+	       	if ( $('#to-branch').val() !== null && $('#to-branch').val() !== "" )  {
+			  branch = $( '#to-branch' ).val();
+		    } else {
+			  branch = $.cookie("brCode");
+		 }
+	       	var result = confirm("Do you want to print the invoice?");
+			if (result == true) {
+				var invoice_url = "/eazytrack/tmp/inv_" + aData[3] + "_" + $.cookie("brCode") + ".pdf";
+				window.open(invoice_url, 'Invoice # ' + aData[3], 'window settings');
+			} else {
+
+			}
+		});
+	}
+		
+	   /*
+		*    Click event for reject operation  
+		*    to reject the invoice raised . 
+		*/
+	//	$("#purchases-report-table").on("click", "td:nth-child(11)", function() {
+		
+		function invoiceReject(element , aData) {
+		  debugger ;
+			var objres =  new Object() ;
+			
+		   var nTr = $(this).parents('tr')[0] ;  
+				// var aData = oTable.fnGetData( nTr );
+				 var aData = aData;
+		       var obj = new Object();
+	 	       obj.invoice_no = aData.invoice_no ;    // hidden param of invoice no
+	 	       
+	 	       
+	 	       $(element).on("click" , function() {
+	 	       	if ( $('#to-branch').val() !== null && $('#to-branch').val() !== "" )  {
+				  obj.branch = $( '#to-branch' ).val();
+			    } else {
+				  obj.branch = $.cookie("brCode");
+			 }
+	 	       obj.branch = $.cookie("brCode");
+	 	       obj.action = "reject" ;
+			
+	 	      objres.action = "reject" ;
+	 	      objres.txn_type = "p"; // Tranasaction type is purchase
+	 	      objres.invoice = obj ;	
+	 	      
+	 	     
+	 	     $.ajax({
+					//url : getRequestUrl(6),
+					url : "/eazytrack/EzTrackServlet?opcode=6",
+					async : true ,
+					dataType : "json" ,
+					type : "POST" ,
+					data : {
+							 "data" : JSON.stringify(objres)
+					    },
+					timeout : 60000,
+					success : function(data) {
+						if (data.result == 0 ) {
+							alert ('Invoice Rejected Successfully !');
+							
+						}
+					},
+					
+					error : function(xhr, status, exception) {
+						$("#xfer").text("Transfer");
+						showMessage(status + ": " + xhr.status + " " + exception);
+					}
+	 	     });
+	 	     
+	 		var rejson = new Object();
+			reloadTable(rejson);    // Reloads the datatable  after rejecting the perticular invoice to show the changes 
+		});
+	   
+	} // End of function
+		
+	
+	     /*
+	     *   This is used to reload the table with different filters
+	     */
+		function reloadTable( result ) {
+			var oTable = $("#purchases-report-table").dataTable();
+				 	var oSettings = oTable.fnSettings();
+			     	oTable.fnReloadAjax();
+				  	 oTable.fnDraw();
+			}
+		
+		/**
+		 * Retrieves and displays the line items of a given invoice.
+		 */
+		function invoiceTooltip(element, inv) {
+
+			var data   = new Object();
+			data.inv_no = inv;
+			data.branch = $.cookie("brCode");
+			data.txn_type = 'purchase';
+
+			$(element).qtip({
+				content : {
+					text : "<img src='resources/ajax-loader.gif'> lading...",
+					title : "Invoice#" + inv + " items...",
+					ajax : {
+						url : getRequestUrl(29),
+						type : "POST",
+						dataType : "json",
+						data : {"data":JSON.stringify(data)},
+						success : function(content) { 
+							// Set the tooltip content upon successful retrieval
+							this.set('content.text', formatAsTable(content));
+						},
+						error : function(xhr, status, error) {
+							// Upon failure... set the tooltip content to the status and error value
+							this.set('content.text', status + ': ' + error);
+						}
+					}
+				},
+				style : {
+					width: "700px",
+					//classes: "q2tip qtip-shadow"
+					classes: "qtip-bootstrap qtip-shadow"
+				}
+			});
+
+		}
+		
+		
+		
+		function formatAsTable(data) {
+			var html = "<table class='table table-bordered' >";
+			
+			// header row
+			html += "<thead><tr>";
+			html += "<th> # </th>";
+			html += "<th> Item Description </th>";
+			html += "<th> Rate </th>";
+			html += "<th> Quantity </th>";
+			html += "<th> Dsc %</th>";
+			html += "<th> Discount </th>";
+			html += "<th> VAT% </th>";
+			html += "<th> Amount </th>";
+			html += "</tr></thead>";
+			
+			// data rows
+			for ( var i=0; i<data[0].items.length; i++ ) {
+				html += "<tr>";
+				html += "<td>" + (i+1) + "</td>";	//slno
+				html += "<td>" + data[0].items[i].name + "</td>";	
+				html += "<td>" + data[0].items[i].rate + "</td>";
+				html += "<td>" + data[0].items[i].qty + "</td>";
+				html += "<td>" + data[0].items[i].disc_percent + "</td>";
+				html += "<td>" + data[0].items[i].discnt + "</td>";
+				html += "<td>" + data[0].items[i].vat_percent + "</td>";
+				html += "<td>" + data[0].items[i].amount + "</td>";
+				html += "</tr>";
+			}
+			html += "<tr>";
+			html += "<td colspan='3'>  </td>" ;
+			html += "<td >" + data[0].qty_total + "</td>" ;
+			html += "<td colspan='1'>  </td>" ;
+			html += "<td colspan='1'>" + data[0].dis_total + "</td>" ;
+			html += "<td colspan='1'>  </td>" ;
+			html += "<td>" + data[0].amt_total + "</td>";
+			html += "</tr>";
+			
+			// total amount should come first 
+			// then taxes
+			for ( var i=0; i<data[0].taxes.length-1; i++ ) {    // -1 to skip total vat
+				html += "<tr>";
+				html += "<td colspan='7'>  </td>";
+				html += "<td>" + data[0].taxes[i] + "</td>";
+				html += "</tr>";
+			}
+			
+			html += "<tr>";
+			html += "<td colspan='6'>  </td>" ;
+			html += "<td > Additional  </td>" ;
+			html += "<td > "+data[0].additional+" </td>" ;
+			html += "<tr>";
+			
+			html += "<tr>";
+			html += "<td colspan='6'>  </td>" ;
+			html += "<td > Round of discount  </td>" ;
+			html += "<td > "+data[0].round_disc+" </td>" ;
+			html += "<tr>";
+			
+			html += "<tr>";
+			html += "<td colspan='6'>  </td>" ;
+			html += "<td > Grand Total  </td>" ;
+			html += "<td > "+data[0].grand_total+" </td>" ;
+			html += "<tr>";
+
+			html += "</table>";
+			return html;
+			
+		}
+		
+		
+		
+		
+		/**
+		 * Checks to see if all required relevant fields have been filled and correct or not .
+		 * if values value id filled it should be correct .
+		 */
+		
+		function validate ( obj )   {
+		 	var valid = true;
+		 	
+		 	if ( obj.fdate == "" && obj.tdate == ""  && obj.cust_name == "" && obj.inv_from == "" && obj.inv_to == "" ) {
+		 	    showMessage("Atleast one filtering input is Required !", "danger", true);
+				$("#from-date").addClass("red-border");
+				valid = false;
+		 	} 
+		 	
+		 	if (  obj.fdate !== "" && obj.tdate !== "" )   {
+		 		if (new Date(obj.fdate) > new Date(obj.tdate)) {
+		 				showMessage("from date is greater than to date !","danger",true );
+						$("#from-date").addClass("red-border");
+						valid = false ;
+		 		}
+		 	}
+		 	
+		 	if (  obj.fdate !== "" ) {
+		 		if (obj.tdate == "") {
+		 				showMessage("Both the dates are required !","danger",true );
+						$("#from-date").addClass("red-border");
+						valid = false ;
+		 		}
+		 	}
+		 	
+		 	if (  obj.tdate !== "" ) {
+		 		if (obj.fdate == "") {
+		 				showMessage("Both the dates are required !","danger",true );
+						$("#from-date").addClass("red-border");
+						valid = false ;
+		 		}
+		 	}
+		 	
+		 	if (obj.cust_name !== "" )  {
+		 		if (obj.cust_id == "" ) {
+		 			showMessage("Select seller from the list !", "danger", true);
+					$("#cust-name").addClass("red-border");
+					valid = false;
+		 		}
+		 	}
+		 	
+		 	if (obj.inv_from !== "" && obj.inv_to !== "")  {
+		 		if (isNaN(obj.inv_from) || isNaN(obj.inv_to) ) {
+		 			showMessage("Only Numbers are Allowed for invoice Numbers ", "danger", true);
+					$("#inv_from").addClass("red-border");
+					valid = false;
+					return valid ;
+		 		}
+		 		
+		 		if ( parseInt(obj.inv_from) > parseInt(obj.inv_to) ) {
+		 			showMessage("Invoice Number from is greater the Invoice No To", "danger", true);
+					$("#inv_from").addClass("red-border");
+					valid = false;
+					return valid ;
+		 		}
+		 	}
+		 	
+		 	 	if (  obj.inv_from !== "" ) {
+		 		if (obj.inv_to == "") {
+		 				showMessage("Both the invoice Numbers required !","danger",true );
+						$("#inv_to").addClass("red-border");
+						valid = false ;
+		 		}
+		 	}
+		 	
+		 	 if (  obj.inv_to !== "" ) {
+		 		if (obj.inv_from == "") {
+		 				showMessage("Both the invoice Numbers required !","danger",true );
+						$("#inv_from").addClass("red-border");
+						valid = false ;
+		 		}
+		 	}
+		 	
+		 	
+		 		 	
+		 	
+		 		if ( valid )
+				removeMessage();
+			return valid;
+		 	
+		}  // End of validation function
+	
+
+		/**
+		 * Makes an ajax call to retrieve the sales report data with the selected filter.
+		 * Updates the table upon successful retrieval, and stores the for future use.
+		**/
+		function updateReport(filterData) {
+			      debugger;
+			    $("#btn-filter").data("filterData" , filterData);   // Holding filter data  to send to XL printing 
+			   //  $("#btn-filter").data();   // this returns the data of the element
+			   
+			   alert ("Getting Filter Data ->"+JSON.stringify($("#btn-filter").data().filterData ));
+				var oTable = $("#purchases-report-table").dataTable();
+			 	var oSettings = oTable.fnSettings();
+		     	oTable.fnReloadAjax(getRequestUrl(23)+"&data="+JSON.stringify(filterData));
+			//  	oTable.fnReloadAjax('responses/sale-txn-rizwan.txt');
+			  	 oTable.fnDraw();
+	
+		}
+		
+</script>

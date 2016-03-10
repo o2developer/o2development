@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "name": "NOS"
+  },
+  {
+    "id": 2,
+    "name": "CAN"
+  },
+  {
+    "id": 3,
+    "name": "PACKET"
+  },
+  {
+    "id": 4,
+    "name": "BOX"
+  },
+  {
+    "id": 5,
+    "name": "PAIR"
+  },
+  {
+    "id": 6,
+    "name": "KILOGRAM"
+  },
+  {
+    "id": 7,
+    "name": "SET"
+  },
+  {
+    "id": 8,
+    "name": "DOZ"
+  }
+]

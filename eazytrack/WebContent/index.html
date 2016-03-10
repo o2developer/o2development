@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+		<title>index</title>
+		<meta name="description" content="">
+		<meta name="author" content="ravindranath.m">
+
+		<meta name="viewport" content="width=device-width; initial-scale=1.0">
+
+		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+		<link rel="shortcut icon" href="/favicon.ico">
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+		<link rel="stylesheet" href="bootstrap-3.0.3/dist/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="css/explore.css" />
+	</head>
+
+	<body>
+
+		<div class="container">
+			Hello world!
+			<div class="row">
+				<div class="col-sm-2 col-md-2 col-lg-2">
+					<div class="cpanel shadow">
+						<div class="cpanel-heading">
+							Panel heading
+							<span class="glyphicon glyphicon-remove pull-right"></span>
+						</div>
+						<div class="cpanel-body">
+							Panel body
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-10">
+					<div id="canvas" class="cpanel shadow">
+						<div class="cpanel-heading">
+							Stock Item Creation <span class="glyphicon glyphicon-remove pull-right"></span>
+						</div>
+						<div class="cpanel-body" >
+							<form id="stock-creation-form" class="form-horizontal" role="form">
+								
+								<div class="form-group">
+									<label for="item-name" class="col-sm-5 control-label">Item Name</label>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" id="item-name" placeholder="Enter Item Name">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="item-category" class="col-sm-5 control-label">Item Category</label>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" id="item-category" placeholder="Choose Item Category">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="item-cost" class="col-sm-5 control-label">Item Cost</label>
+									<div class="col-sm-5">
+										<input type="number" class="form-control" id="item-cost" placeholder="Enter Item Cost">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="item-price" class="col-sm-5 control-label">Max. Retail Price (MRP)</label>
+									<div class="col-sm-5">
+										<input type="number" class="form-control" id="item-price" placeholder="Enter Item Price">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="item-tax-rate" class="col-sm-5 control-label">Tax applicable</label>
+									<div class="col-sm-5">
+										<input type="number" class="form-control" id="item-tax-rate" placeholder="Enter Tax Rate ">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="item-discount-rate" class="col-sm-5 control-label">Discount applicable</label>
+									<div class="col-sm-5">
+										<input type="number" class="form-control" id="item-discount-rate" placeholder="Enter Discount Rate">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="item-op-stock" class="col-sm-5 control-label">Opening Stock</label>
+									<div class="col-sm-5">
+										<input type="number" class="form-control" id="item-op-stock" placeholder="Enter Discount Rate">
+									</div>
+								</div>
+							</form>
+							<hr>
+							<button type="buton" id="save-stock-item" class="btn btn-success btn-sm pull-right">Save</button>
+							<button type="buton" id="cancel" class="btn btn-default btn-sm pull-right">Cancel</button>
+							<div class="clearfix"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script src="js/jquery-2.0.3.min.js"></script>
+		<script src="bootstrap-3.0.3/dist/js/bootstrap.min.js"></script>
+	</body>
+</html>

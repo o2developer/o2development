@@ -1,0 +1,43 @@
+[
+  {
+    "dis_total": 108.3,
+    "qty_total": 7,
+    "items": [
+      {
+        "amount": 510,
+        "category": "GOODS",
+        "rate": 612,
+        "discnt": "91.80",
+        "disc_percent": 15,
+        "name": "DART BOARD VXN",
+        "vat_amout": "27.12",
+        "qty": 1,
+        "vat_percent": 5.5
+      },
+      {
+        "amount": 57.84,
+        "category": "GOODS",
+        "rate": 59,
+        "discnt": "0.00",
+        "disc_percent": 0,
+        "name": "LACES",
+        "vat_amout": "3.08",
+        "qty": 1,
+        "vat_percent": 5.5
+      },
+      {
+        "amount": 523.04,
+        "category": "KAMACHI",
+        "rate": 550,
+        "discnt": "16.50",
+        "disc_percent": 3,
+        "name": "SR KAMACHI 7000",
+        "vat_amout": "27.81",
+        "qty": 1,
+        "vat_percent": 5.5
+      }
+    ],
+    "amt_total": 1090.88,
+    "vat_total": 58.00802
+  }
+]	

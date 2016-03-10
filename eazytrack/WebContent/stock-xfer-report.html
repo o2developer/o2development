@@ -1,0 +1,538 @@
+<div id="stock-xfer-report-content" class="cpanel shadow cpanel-info">
+	<div class="cpanel-heading">
+		Stock Transfer Report...
+		<a href="#" class="panel-close"><span class="glyphicon glyphicon-remove titlebar-icon pull-right"></span></a>
+			
+		<button class="btn btn-default btn-sm pull-right" id="btn-filter"  type="button" >
+			<i class="fa fa-filter"> Filter </i>
+		</button>
+		<a href="#" id="export_to_excel"><img src="resources/Microsoft-Office-Excel-icon.png" width="24" class="pull-right"/></a>
+	</div>
+	
+	<div  id="divfilter_stock"   title="Filter Options" > 
+		<table>
+			<tr>
+				<td><label for="from-date">From Date </label></td>
+				<td> :
+				<input 	class="custom-sridama" id="from-date"  readonly="readonly"   type="text" size="12" />
+				</td>
+
+				<td><label for="to-date">To Date</label></td>
+				<td> :
+				<input class="custom-sridama" id="to-date" readonly="readonly" type="text"
+				size="12" />
+				</td>
+
+			</tr>
+			<tr>
+				&nbsp;
+			</tr>
+
+			<tr>
+			 <select id="from-branch-filter" class="custom-sridama" placeholder="Select target branch">
+					<option value=""></option>
+					<option value="1">Main</option>
+					<option value="2">Domlur Sports Line</option>
+					<option value="3">Ganganagar Sports Line</option>
+					<option value="4">Mahadevapura Sports Line</option>
+				</select>
+			</tr>
+			
+			
+			<tr>
+			 <select id="to-branch-filter" class="custom-sridama" placeholder="Select target branch">
+					<option value=""></option>
+					<option value="1">Main</option>
+					<option value="2">Domlur Sports Line</option>
+					<option value="3">Ganganagar Sports Line</option>
+					<option value="4">Mahadevapura Sports Line</option>
+				</select>
+			</tr>
+
+			<tr >
+				<td>
+				<button type="submit" id="filter-submit" class="btn btn-success btn-sm pull-right">
+					Submit
+				</button></td>
+			</tr>
+		</table>
+	</div>
+	
+	<!-- Filter content goes here , like selelcted  filter value -->
+	<div id="filter-content" class="custom-filter"></div>
+	
+	<div class="cpanel-body">
+		<table   id="stock-trans-report"  class="table table-bordered" >
+			<thead>
+				<tr>
+				    <th> </th>
+					<th> Date </th>
+					<th> DC Number </th>
+					<th> Description </th>
+					<th> Amount </th>
+					<th> Status </th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td colspan="5"><img src="resources/ajax-loader.gif" /> Loading...</td>
+				</tr>
+			</tbody>
+				<tfoot>
+				<tr>
+					<td></td>
+					<td colspan="2"></td>
+					<td class="right-align">Totals</td>
+					<td id="amount_total"></td>
+					<td></td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+</div>
+
+	<script>
+	 $( function() {
+		var object = new Object() ;
+		
+		$('#btn-filter').data('filter',object);
+		
+		$("#stock-trans-report").dataTable({
+			
+			"bProcessing": true,
+			"bServerSide": true,
+			"bFilter" : true,
+			"sSearch" : true,
+	
+			"sAjaxSource" : getRequestUrl(32) + "&data="+JSON.stringify(object),
+			
+			//"sDom": "t<'row'<'col-xs-6'i><'col-xs-6'p>><'row'<'col-xs-12'>>",
+			// "sDom": '<"top"i>rt<"bottom"lf><"clear">',
+
+		
+			"aaSorting" : [[1, 'asc']],
+
+			"aoColumns" : [
+		      null ,
+			     {
+				"mData" : "date"
+			}, {
+				"mData" : "dc_no",
+					"sClass" : "right-align"
+			}, {
+				"mData" : "desc"
+			}, {
+				"mData" : "amount",
+				"sClass" : "right-align"
+			}, {
+				"mData" : "status"
+			} ],
+			
+			"aoColumnDefs" : [
+						{
+							  "aTargets" : [0],
+							  "bSearchable" : false ,
+							   sClass : 'center',
+							   "mData" : function(o) {
+							   return '<a  href="#" id="open-close" title="Details" class="fa fa-info-circle fa-fw" alt="" />';
+							}  },
+			                  
+			                  {
+								"aTargets" : [0],
+				   				"bSearchable" : false
+							},
+			  			       {
+			        	   "aTargets" : [3],
+						   "bSearchable" : false 
+			           },    {
+			        	   "aTargets" : [4],
+						   "bSearchable" : false 
+			           } 
+			  			  ],
+  			  
+  			"fnServerData" : function( sSource, aoData, fnCallback, oSettings ) {
+				aoData.push( { 'branch' : $.cookie("brCode") });
+				oSettings.jqXHR = $.ajax({
+					"dataType" : "json",
+					"url" : sSource,
+					"data" : aoData,
+					"success" : function(data) {
+					//do your stuff here
+						//var o = new Object();
+						//o.aaData = data.aaData;
+						//finally call the original fn.
+						fnCallback(data);
+					}
+				});
+			}, 			  
+			
+			"fnCreatedRow" : function(nRow, aData, iDataIndex) {
+			     invoiceTooltip($("td:eq(0)", nRow), aData);
+			},
+			
+			"fnFooterCallback" : function(nRow, aaData, iStart, iEnd, aiDisplay) {
+				var amount_total = 0;
+		     	for (var i = 0; i < aaData.length ; i++) {
+				//	amount_total += parseFloat(aaData.amount);    //[i][4]
+					amount_total += aaData[i].amount ;
+				} 
+				
+				$("#stock-trans-report tfoot tr td#amount_total").text(amount_total.toFixed(2));
+			}
+	
+		});
+	});
+	
+	/**
+	 *	Converts sales-report.json data to array form recognizable by dataTables.
+	 */
+	function transformSales2Array(data) {
+		var result = new Object();
+		result.aaData = [];
+		for (var i = 0; i < data.length; i++) {
+			var array = [];
+			array.push("");
+			array.push(i + 1);
+			array.push(data[i].date.split(" ")[0]);
+			array.push(data[i].dc_no);
+			array.push(data[i].desc);
+			array.push(data[i].amount.toFixed(2));
+			array.push(data[i].status);
+			array.push(data[i].from_branch);
+			array.push(data[i].to_branch);
+			//array.push("");
+			result.aaData.push(array);
+		}
+		return result;
+	}
+	
+	
+	/**
+	 * the to-branch dropdown should not have the option to select our own brnach. 
+	 */
+		var myBranch =  $.cookie("brCode");
+				$("#to-branch-filter option[value='" + myBranch + "']").remove();
+				$("#from-branch-filter option[value='" + myBranch + "']").remove();
+		
+	
+	/*
+	 *   Date picker function for asking for the date
+   */
+	$(function() {
+		$("#from-date").datepicker({
+			   changeMonth: true,
+			   changeYear: true,
+			   showOn: "button",
+			   buttonImage: "resources/calendar.gif",
+			   buttonImageOnly: true
+			  });
+		$("#from-date").datepicker("option", "dateFormat", "dd/mm/yy");
+		$("#to-date").datepicker({
+			   changeMonth: true,
+			   changeYear: true,
+			   showOn: "button",
+			   buttonImage: "resources/calendar.gif",
+			   buttonImageOnly: true
+			  });
+		$("#to-date").datepicker("option", "dateFormat", "dd/mm/yy");
+	});
+	
+	$(document).ready(function() {
+		/*
+		 *   Dialog for filtering the  filter criteria
+		 */
+		$("#divfilter_stock").dialog({
+			autoOpen : false,
+			show : 'slide',
+			resizable : 'true',
+			position : 'center',
+			stack : true,
+			height : 'auto',
+			width : 'auto',
+			modal : true
+		});
+
+		/*
+		 * on clicking filter button we can see  the filter poping up
+		 */
+		$("#btn-filter").on("click", function() {
+			var date = new Date();
+			 date.setDate(date.getDate()-30);
+			var dd = date.getDate();
+			var mm = date.getMonth() + 1;
+			//January is 0!
+
+		   	
+			var yyyy = date.getFullYear();
+			if (dd < 10) {
+				dd = '0' + dd;
+			}
+			if (mm < 10) {
+				mm = '0' + mm;
+			}
+			//today = mm + '/' + dd + '/' + yyyy;
+			date = dd + "/" + mm + "/" + yyyy;
+			$("#from-date").val(date);
+			$("#to-date").val(today());
+			$("#cust_id").val("");
+			$("#cust_name").val("");
+			$("#inv_from").val("");
+			$("#inv_to").val("");
+			$('#filter-content').text('');
+			removeMessage();
+			$("#divfilter_stock").dialog('open');
+
+		});
+
+		$(document).keyup(function(e) {
+			//	if (e.keyCode == 13) { $('.save').click(); }     // enter
+			if (e.keyCode == 27) {
+				removeMessage();
+			} // esc
+		});
+
+	});
+	// End of ready function
+
+	$(function() {
+		$('#filter-submit').on("click", function() {
+			var values = new Object();
+			values.fdate = convert2outputDt1($("#from-date").val());
+			values.tdate = convert2outputDt1($("#to-date").val());
+			values.cust_id = $("#cust_id").val();
+			values.cust_name = $("#cust_name").val();
+			values.inv_from = $("#inv_from").val();
+			values.inv_to = $("#inv_to").val();
+
+			//calling validation method to validate all the values are proper or not
+			if (! validate(values)) {
+				return;
+			} else {
+				$("#from-date").val("");
+				$("#to-date").val("");
+				$("#cust_id").val("");
+				$("#cust_name").val("");
+				$("#inv_from").val("");
+				$("#inv_to").val("");
+				$("#divfilter_stock").dialog('close');
+
+				var branch_id = '';
+
+				if ($('#to-branch').val() !== null && $('#to-branch').val() !== "") {
+					values.branch = $('#to-branch').val();
+					branch_id = $('#to-branch').val();
+				} else {
+					values.branch = -1;
+					branch_id = $.cookie("brCode");
+				}
+				var resmsg = "";
+				resmsg += "Sales Reports  \n";
+				if (values.fdate !== "" && values.tdate !== "")
+					resmsg += "Between Dates  " + values.fdate + "--" + values.tdate + "\n , ";
+
+				if (values.cust_name !== "")
+					resmsg += "To Customer  " + values.cust_name + " \n , ";
+
+				if (values.inv_from !== "" && values.inv_to !== "")
+					resmsg += "Invoice Nos from " + values.inv_from + " to " + values.inv_to + "\n , ";
+
+				resmsg += "of Branch  " + getBranchName(parseInt(branch_id));
+
+				alert(resmsg);
+				$('#filter-content').append(resmsg);
+				reloadTable(values);
+				// finally calling the reload function for  refreshig the table for current filter
+			}
+		});
+		//  End click function
+
+		
+		/*
+		*   Exports the results to XL sheet of current Filter .
+		*/
+			
+		 $("#export_to_excel").on("click", function(e) {
+				var filter = $("#btn-filter").data("filter");
+				
+				$.ajax({
+					url: getRequestUrl(37),
+					type: "POST",
+					dataType: "json",
+					data: { data: JSON.stringify(filter) }, 
+					success: function(data) {
+					if (data.result == 0 ) {
+						var  xl_url = "/eazytrack/tmp/"+data.path ;
+						window.open(xl_url, 'Stock trns Report # ' , 'window settings');
+					}
+						
+					},
+					error: function(xhr, status, error) {
+					   showMessage('Unable to Export '+status+":"+error);
+					}
+				});
+			});
+	});
+	// End of function
+	
+	/**
+	 * Checks to see if all required relevant fields have been filled and correct or not .
+	 * if values value id filled it should be correct .
+	 */
+
+	function validate(obj) {
+		var valid = true;
+
+		if (obj.fdate == "" && obj.tdate == "" && obj.cust_name == "" && obj.inv_from == "" && obj.inv_to == "") {
+			showMessage("Atleast one filtering input is Required !", "danger", true);
+			$("#from-date").addClass("red-border");
+			valid = false;
+		}
+
+		if (obj.fdate !== "" && obj.tdate !== "") {
+			if (new Date(obj.fdate) > new Date(obj.tdate)) {
+				showMessage("from date is greater than to date !", "danger", true);
+				$("#from-date").addClass("red-border");
+				valid = false;
+			}
+		}
+
+		if (obj.fdate !== "") {
+			if (obj.tdate == "") {
+				showMessage("Both the dates are required !", "danger", true);
+				$("#from-date").addClass("red-border");
+				valid = false;
+			}
+		}
+
+		if (obj.tdate !== "") {
+			if (obj.fdate == "") {
+				showMessage("Both the dates are required !", "danger", true);
+				$("#from-date").addClass("red-border");
+				valid = false;
+			}
+		}
+
+		if (obj.cust_name !== "") {
+			if (obj.cust_id !== "") {
+				showMessage("Select seller from the list !", "danger", true);
+				$("#cust-name").addClass("red-border");
+				valid = false;
+			}
+		}
+
+		if (obj.inv_from !== "" && obj.inv_to !== "") {
+			if (isNaN(obj.inv_from) || isNaN(obj.inv_to)) {
+				showMessage("Only Numbers are Allowed for invoice Numbers ", "danger", true);
+				$("#inv_from").addClass("red-border");
+				valid = false;
+				return valid;
+			}
+
+			if (parseInt(obj.inv_from) > parseInt(obj.inv_to)) {
+				showMessage("Invoice Number from is greater the Invoice No To", "danger", true);
+				$("#inv_from").addClass("red-border");
+				valid = false;
+				return valid;
+			}
+		}
+
+		if (obj.inv_from !== "") {
+			if (obj.inv_to == "") {
+				showMessage("Both the invoice Numbers required !", "danger", true);
+				$("#inv_to").addClass("red-border");
+				valid = false;
+			}
+		}
+
+		if (obj.inv_to !== "") {
+			if (obj.inv_from == "") {
+				showMessage("Both the invoice Numbers required !", "danger", true);
+				$("#inv_from").addClass("red-border");
+				valid = false;
+			}
+		}
+
+		if (obj.cust_name !== "") {
+			if (obj.cust_id !== "") {
+				showMessage("Select seller from the list !", "danger", true);
+				$("#cust-name").addClass("red-border");
+				valid = false;
+			}
+		}
+
+		if (valid)
+			removeMessage();
+		return valid;
+
+	}// End of validation function
+	
+	
+	/**
+	 * Retrieves and displays the line items of a given invoice.
+	 */
+	function invoiceTooltip(element, aData ) {
+		
+	//	var data = {};
+	    var data   = new Object();
+		data.dc_no =  aData.dc_no ;
+		data.from_branch = aData.from_branch ;
+		data.to_branch = aData.to_branch ;
+
+		$(element).qtip({
+			content : {
+				text : "<img src='resources/ajax-loader.gif'> lading...",
+				title : "DC#" + data.dc_no + " items...",
+				ajax : {
+					url : getRequestUrl(33),
+					type : "POST",
+					dataType : "json",
+					data : {"data":JSON.stringify(data)},
+					success : function(content) { 
+						// Set the tooltip content upon successful retrieval
+						this.set('content.text', formatAsTable(content ));
+					},
+					error : function(xhr, status, error) {
+						// Upon failure... set the tooltip content to the status and error value
+						this.set('content.text', status + ': ' + error);
+					}
+				}
+			},
+			style : {
+				width: "700px",
+				//classes: "q2tip qtip-shadow"
+				classes: "qtip-bootstrap qtip-shadow"
+			}
+		});
+
+	}
+	
+	
+	function formatAsTable(data) {
+		var html = "<table class='table table-bordered' >";
+		
+		// header row
+		html += "<thead><tr>";
+		html += "<th> # </th>";
+		html += "<th> Item Description </th>";
+		html += "<th> Category </th>";
+		html += "<th> Quantity </th>";
+		html += "<th> Amount </th>";	
+		html += "<th> Note </th>";	
+		html += "</tr></thead>";
+		
+		// data rows
+		for ( var i=0; i<data.length; i++ ) {
+			html += "<tr>";
+			html += "<td>" + (i+1) + "</td>";	//slno
+			html += "<td>" + data[i].name + "</td>";
+			html += "<td>" + data[i].category + "</td>";
+			html += "<td>" + data[i].qty + "</td>";
+			html += "<td>" + data[i].amount + "</td>";
+			html += "<td>" + data[i].note + "</td>";
+			html += "</tr>";
+		}
+		html += "</table>";
+		return html;
+	}
+	
+</script>

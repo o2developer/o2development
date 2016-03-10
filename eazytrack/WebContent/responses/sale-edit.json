@@ -1,0 +1,48 @@
+{ 
+    "inv_no" : "2" ,
+    "cust_name" : "WALKIN",
+    "cust_id" : "47" ,
+    "inv_date" : "12-12-2013",
+    "payment_type" : "1" ,
+    "interstate" : "y",
+    "cform" : "y",
+    
+  "items": [
+    {
+        "name" : "cricket bat",
+        "id"   :  "45" ,
+        "qty"  : "8" ,
+        "rate" : "8500.00",
+        "discnt_percent" : "10.00",
+        "cform" : "n",
+        "vat"   : "5.5"
+    },
+     {
+        "name" : "cricket ball",
+        "id"   :  "47" ,
+        "qty"  : "7" ,
+        "rate" : "8500.00",
+        "discnt_percent" : "10.00",
+        "cform" : "n",
+        "vat"   : "5.5"
+    } ,
+        	 {
+        "name" : "tennis bat",
+        "id"   :  "49" ,
+        "qty"  : "5" ,
+        "rate" : "8500.00",
+        "discnt_percent" : "10.00",
+        "cform" : "n",
+        "vat"   : "5.5"
+    } ,
+     {
+        "name" : "tennis  ball",
+        "id"   :  "51" ,
+        "qty"  : "5" ,
+        "rate" : "8500.00",
+        "discnt_percent" : "10.00",
+        "cform" : "n",
+        "vat"   : "5.5"
+    }
+  ]
+}

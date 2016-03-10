@@ -1,0 +1,19 @@
+{
+ "name":"SOME ITEM116",
+ "code":"7020",
+ "category":"806",
+ "units":"1",
+ "rate":"700.00",
+ "op_bal":
+  [
+    {"br_code":"1","stock":"0"},
+    {"br_code":"2","stock":"0"},
+    {"br_code":"3","stock":"0"},
+    {"br_code":"4","stock":"0"}
+  ],
+  "cost":"500.00",
+  "discnt_percent":"-1",
+  "discnt_percent_val":"2.32",
+  "tax_slab":"-1",
+  "tax_slab_val":"20.5"
+ }

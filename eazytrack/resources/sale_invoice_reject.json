@@ -1,0 +1,8 @@
+{
+  "action": "reject",
+  "invoice": {
+    "invoice_no": 196,
+    "action": "reject",
+    "branch" :  1
+  }
+}

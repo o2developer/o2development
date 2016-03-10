@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+		<title>login</title>
+		<meta name="description" content="">
+		<meta name="author" content="rv">
+
+		<meta name="viewport" content="width=device-width; initial-scale=1.0">
+
+		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+		<link rel="shortcut icon" href="/favicon.ico">
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+		<link rel="stylesheet" href="bootstrap-3.0.3/dist/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="font-awesome-4.0.3/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="css/explore.css" />
+
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="row">
+				<div id="hdr-row" class="col-lg-12">
+					<div class="place-holder" include-file="eztrack-hdr.html"></div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-12 col-md-12 col-sm-12">
+
+					<div id="login" class="cpanel cpanel-info shadow" >
+						<div class="cpanel-heading">
+							Login
+						</div>
+						<div class="cpanel-body">
+							<form class="form-horizontal" role="form">
+								<div class="form-group">
+									<label for="user-name" class="col-sm-3 control-label">User Name</label>
+									<div class="col-sm-8 ">
+										<input type="text" class="form-control" id="user-name" placeholder="User Name">
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="password" class="col-sm-3 control-label">Password</label>
+									<div class="col-sm-8">
+										<input type="password" class="form-control" id="password" placeholder="Password">
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="brcode" class="col-sm-3 control-label">Branch</label>
+									<div class="col-sm-8">
+										<!-- <input type="password" class="form-control" id="password" placeholder="Password"> -->
+										<select id="brcode" class="form-control">
+											<option value="1">Main Branch</option>
+											<option value="2">Domlur Branch</option>
+											<option value="3">Ganganagar Branch</option>
+											<option value="4">Mahadevpura Branch</option>
+										</select>
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="col-sm-offset-3 col-sm-8">
+										<button id="sign-in" type="button" class="btn btn-primary">
+											 <!-- i class="fa fa-spinner fa-spin"> </i> --> Sign In
+										</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="js/jquery-2.0.3.min.js"></script>
+		<script src="js/recursiveLoader.js"></script>
+		<script src="js/jquery.cookie.js"></script>
+		
+		<script>
+			loadTree($(".place-holder"));
+
+			centerLogin($("#login"));
+			
+			$( "#user-name" ).focus();
+
+			$("#sign-in").on("click", function() {
+				$(this).html("<i class='fa fa-spinner fa-spin'> </i> &nbsp; &nbsp; Signing in...");
+				var json = serializeData();
+				$.ajax({
+					url: "/eazytrack/EzTrackServlet?opcode=0",
+					//url: "http://127.0.0.1:8090/eazytrack/EzTrackServlet?opcode=0",
+					type: "POST",
+					dataType: "json",
+					timeout: 30000,	// half-a-minute for login
+					data : { data: JSON.stringify(json) }, 
+					success: function(data) {
+						if (data.result == 0) {
+							//window.location.replace("/eazytrack/eztrack.html");
+							window.location.href = "/eazytrack/eztrack.html";
+						}
+						else {
+							setErrorMsg();
+							$("#sign-in").text("Sign In");
+						}
+					},
+					error: function() {
+						setErrorMsg();
+						$("#sign-in").text("Sign In");
+					}
+					// complete: function() {
+						// $("#sign-in").text("Sign In");
+					// }
+
+				});
+			});
+
+			function serializeData() {
+				var json = new Object();
+				json.user = $("#user-name").val();
+				json.password = $("#password").val();
+				json.branch_code = $("#brcode").val();
+				//var data = new Object();
+				//data.data = json;
+				//console.log (JSON.stringify(data));
+				return json; //JSON.stringify(data);
+			}
+			
+			function setErrorMsg(msg) {
+				console.log("Invalid login.");
+				$("#login .cpanel-body p").remove();
+				//msg = undefined || "Invalid Login."; please enter the username and password correctly
+				msg = undefined || "please enter the username and password correctly.";
+				$("#login .cpanel-body").append("<p style='color:red'>" + msg + "</p>");
+			}
+			
+			function centerLogin(element) {
+				//var loginWidth = element.width();
+				var loginHeight = element.height();
+				//var winWidth = $(document).width();
+				var winHeight = $(document).height();
+				
+				//var loginLeft = (winWidth - loginWidth)/2;
+				var loginTop = (winHeight - loginHeight)/2 - 50;
+				//element.css("left", loginLeft + "px");
+				element.css ({
+					position: "relative",
+					top: loginTop + "px"
+				});
+				//element.css("top", loginTop + "px");
+			}
+		</script>
+	</body>
+</html>

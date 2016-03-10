@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>eazytrack</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  
+ <servlet>
+		<servlet-name>EzTrackServlet</servlet-name>
+		<servlet-class>com.sridama.eztrack.controller.EzTrackServlet</servlet-class>
+		<init-param>
+			<param-name>log4j-properties-location</param-name>
+			<param-value>WEB-INF\classes\log4j.properties</param-value>
+		</init-param>
+		<init-param>
+		    <!-- / for windows and \\ for linux used in EzTrackServlet Servlets init method -->
+			<param-name>delimeter</param-name>
+			<param-value>/</param-value>
+		</init-param>	
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+  
+    <servlet-mapping>
+		<servlet-name>EzTrackServlet</servlet-name>
+		<url-pattern>/EzTrackServlet</url-pattern>
+	</servlet-mapping>	
+ 
+ <filter>
+    <filter-name>SessionFilter</filter-name>
+    <filter-class>
+        com.sridama.eztrack.controller.SessionFilter
+    </filter-class>
+    <init-param>
+        <param-name>avoid-urls</param-name>
+        <param-value>/login.html, /eztrack-hdr.html</param-value>
+    </init-param>
+</filter>
+<filter-mapping>
+    <filter-name>SessionFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+  
+  <listener>
+   <listener-class>com.sridama.eztrack.controller.ReqListener</listener-class>
+</listener>
+</web-app>

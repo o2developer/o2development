@@ -1,0 +1,484 @@
+<div id="new-sale" class="cpanel shadow cpanel-info">
+	<div class="cpanel-heading">
+		New Sale
+		<a href="#" class="panel-close"><span class="glyphicon glyphicon-remove titlebar-icon pull-right"></span></a>
+		<!-- <i class="fa fa-floppy-o pull-right"></i>
+		<i class="fa fa-print pull-right"></i> -->
+	</div>
+	<div class="cpanel-body">
+		<div class="bottom-border">
+			<div id="invoice-num-display">
+				Invoice No.:
+				<input type="text" readonly class="custom-sridama" id="invoice-no" />
+			</div>
+			<div id="date-display" class="pull-right">
+				<label id="date">Dated:</label>
+			</div>
+		</div>
+		<br>
+		<div class="bottom-border">
+			<div id="cust-bill-block">
+				<i class="fa fa-user"></i> Customer Billing Details: <a id="cust-details" href="#"><i id="customer-ext" class="fa fa-minus-circle"></i></a>
+			</div>
+			<div id="cust-bill-ext">
+				<label for="cust-name" >Name:</label>
+				<input class="custom-sridama" id="cust-name"    type="text"  />  
+			
+			<label for="cust-phone">Phone:</label>
+				<input id="cust-phone"  class="custom-sridama"  onkeydown="allowNumbers(event)" maxlength="13"  type="number" /> 
+				
+				<!-- <label for="payment-type">Payment Type:</label> -->
+				<!-- <select id="payment-type-select" class="custom-sridama"> -->
+				<select id="payment-type-select" class="custom-sridama">
+					<!-- <option value="-1">Payment Method</option> -->
+					<option value="0">Cash</option>
+					<option value="1">Cheque</option>
+					<option value="2">Card</option>
+				</select>
+				<input class="inline-chk" type="checkbox" id="interstate"/>
+				Interstate
+				<input class="inline-chk" type="checkbox" id="cform" disabled/>
+				CForm
+			</div>
+		</div>
+		<br>
+		<div>
+			<a href="#" id="add-item-row" class="pull-right"><i class="fa fa-plus-circle"> </i> Add Item Row</a>
+		</div>
+		<table id="item-details" class="table table-bordered table-condensed">
+			<thead>
+				<tr>
+					<th></th>
+					<th>#</th>
+					<th width="60%"> Item Particulars </th>
+					<th width="5%" class="align-right">Quantity</th>
+					<th width="5%">MRP</th>
+					<th width="5%">Discount(%)</th>
+					<th width="5%">Discount</th>
+					<th id="tax-heading" width="5%">VAT%</th>
+					<th class="right-align" width="10%">Amount</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td class="delete"><a href="#"><i class="fa fa-trash-o idle"> </i></a> </td>
+					<td class="sl-no td-input">1</td>
+					<td class="desc td-input">
+					<input class="desc" id="item-data_1" autocomplete="off" type="number" placeholder="Enter Item code (or) name (or) category or F1 for list of items"/>
+					</td>
+					<td class="qty right-align td-input">
+					<input class="right-align" align="right" type="number" />
+					</td>
+					<td class="rate right-align"> </td>
+					<td class="disc-prcnt td-input">
+						<input class="right-align" type="number" />
+					</td>
+					<td class="disc-val right-align"> </td>
+					<td class="vat right-align"> </td>
+					<td class="amount right-align"> </td>
+				</tr>
+			</tbody>
+
+			<tfoot>
+				<tr class="footer">
+					<td colspan="3" class="right-align">Amt before Tax n Discount:</td>
+					<td id="qty-total" class="right-align"></td>
+					<td></td>
+					<td></td>
+					<td id="disc-total" class="right-align"></td>
+					<td id="tax-total" class="right-align"></td>
+					<td id="base-total" class="right-align"></td>
+				</tr>
+				<tr class="footer">
+					<td colspan="3" class="right-align">Inclusive of taxes: CST / VAT:</td>
+					<td colspan="5" class="right-align"></td>
+					<td id="amt-with-taxes" class="td-input right-align"></td>
+				</tr>
+		     <!--  <tr class="footer">
+					<td colspan="3" class="right-align">Amount after discount:</td>
+					<td colspan="5" class="right-align"></td>
+					<td id="amt-after-discount" class="td-input right-align"></td>
+			   </tr>   --> 
+				<tr class="footer">
+					<td colspan="3" class="right-align">Additional Charges: [Transportation]</td>
+					<td colspan="5" class="right-align"></td>
+					<td id="addnl-charges" class="td-input">
+					<input type="number" class="right-align" onkeydown="allowNumbers(event)" autocomplete="off"/>
+					</td>
+				</tr>
+
+				<tr class="footer">
+					<td colspan="3" class="right-align">Round-off Discount:</td>
+					<td colspan="5" class="right-align"></td>
+					<td id="roundoff" class="td-input">
+					<input type="number" class="right-align" onkeydown="allowNumbers(event)" autocomplete="off"/>
+					</td>
+				</tr>
+				<tr class="footer">
+					<td colspan="3" class="right-align">Final Total: </td>
+					<td colspan="5" class="right-align"></td>
+					<td id="grand-total" class="right-align"></td>
+				</tr>
+			</tfoot>
+		</table>
+		<hr>
+		<button type="button" id="save-new-sale" class="btn btn-success btn-sm pull-right">
+			Save
+		</button>
+		<button type="button" id="cancel" class="btn btn-default btn-sm pull-right">
+			Cancel
+		</button>
+		<div class="clearfix"></div>
+	</div>
+</div>
+
+
+<script>
+var tags = [];
+	$(function() {
+		$("#item-details tbody").delegate("td.desc input", "keydown", function(event) {
+
+			if (event.keyCode == 112) {
+				$("#item-list-dialog").data("invoker", this);
+				$("#item-list-dialog").dialog("open");
+
+			}
+		});
+
+		$("#cust-details").on("click", function() {
+			$("#cust-bill-et").animate({
+				"height" : "toggle"
+			});
+			$("#customer-ext").toggleClass("fa-plus-circle fa-minus-circle");
+			$("#cust-bill-ext").slideToggle("fast");
+		});
+
+		
+		/*
+		*   This is when cancel button is clicked
+		*/
+		 $("#cancel").on("click", function(){
+				location.reload();
+			});
+		
+			
+		
+		   /**
+			 * Add typeahead capability to cust-name field.
+			 */
+			$("#cust-name").typeahead({
+				name : "customers",
+				remote : getRequestUrl(2),
+				limit : 10,
+				template : ["<p>{{name}}, {{phone1}}</p>"].join(""),
+				header : "<div class='bottom-border hint-header'><h5>Customer , Phone </h5></div>",
+				engine : Hogan,
+			});
+		   
+			$("#cust-name").bind('typeahead:selected', function(obj, datum, name ) {
+				console.log("selection triggered");
+				$("#cust-name").val(datum.name);
+				$("#cust-phone").val(datum.phone2);
+				$("#cust-name").data("customer", datum );
+			});
+			
+	/* 		$("#cust-name").bind('typeahead:autocompleted', function(obj, datum, name) {
+				console.log("Autocomplete event");
+				$("#cust-name").val(datum.name);
+				$(this).data("customer", datum);
+			});
+			
+			
+			$("#cust-name").on("change", function() {
+					var $input = $(this);
+					var available = $input.data('ttView').datasets[0].itemHash;
+					//var datum = _.findWhere(available, {
+						//value : $(this).val()
+					//});
+					var datum = findEntry(available, $(this).val());
+					if (datum) {
+						$input.trigger('typeahead:selected', datum);
+					} else {
+						$input.trigger('typeahead:uservalue', $(this).val());
+					}
+				});  
+			
+	   $('#cust-name').bind('typeahead:uservalue', function(value) {
+					console.log("uservalue triggered!");
+			        $("#cust-phone").val("");
+					$("#cust-name").removeData("customer");
+					$("#cust-phone").focus();
+					console.log("focus set to phone field.");
+				});   
+	 */		
+			
+		/* 	name : "customers",
+			prefetch : {
+				 //url : "responses/customer-list.json",
+				url : getRequestUrl(2), 
+				filter : transformCustomers2Datum
+			},
+			template : "<p>{{value}}, {{phone2}}</p>",
+			engine : Hogan */
+
+			/**
+			 * Fetch n display next invoice number on load.
+			 */
+			getNextInvoiceNum($("#invoice-no") , 'sale' );
+			
+	
+			
+			
+			
+		/* 	$("#cust-name").on("keyup", function(e) {
+				if (e.which == 13) {
+					$(this).trigger("change");
+				}
+			}); */
+				
+
+
+		
+		bindTypeAhead($("#item-data_1"));
+
+		// $("table#item-details tbody").delegate("tr td input.desc", "change", function() {
+			// var $input = $(this);
+			// var available = $input.data('ttView').datasets[0].itemHash;
+			// var datum = findEntry(available, $(this).val());
+			// if (datum) {
+				// $input.trigger('typeahead:selected', datum);
+			// } else {
+				// $input.trigger('typeahead:uservalue', $(this).val());
+			// }
+		// });
+
+	$("table#item-details tbody").delegate("td.qty input", "change", function() {
+				console.log("Am I executing???");
+				
+				// Allow the input if and only if it is less than available stock.
+				var quantity = parseInt($(this).val());
+				var stock = parseInt($(this).parents("tr").data("item-info").qty);
+				if (quantity > stock) {
+					
+					alert("Entered quantity is greater than available stock of " + stock + "!");
+					$(this).select();
+					return;
+				}else if( quantity < 1){
+					alert("Entered quantity should not be zero ");
+					showMessage("A payment method must be selected for this invoce!");
+					} else {
+						removeMessage();
+						$(".qty").removeClass("red-border");
+					}
+				updateRow($(this).parents("tr"));
+				
+					});
+			
+			$("table#item-details tbody").delegate("td.qty input", "keyup", function(e) {
+				var quantity = parseInt($(this).val());
+				var stock = parseInt($(this).parents("tr").data("item-info").qty);
+				console.log("Why the bloody hell, I am not executing???");
+				//debugger ;
+				if ($(this).attr('ext') == "true") {
+					$(this).removeAttr('ext');
+					return ;
+				}
+			if (e.which == 13 ) {
+					// if we are on the last row, then add a new row.
+					if ( $(this).closest("tr").is(":last-child") &&  $(this).closest("tr").find("td.desc input:last").val() != "" ) {
+						e.preventDefault();
+						if(quantity >= 1){
+						addNewRow();
+						$("table#item-details tbody tr:last-child td.desc input").focus();
+						}
+					}
+			}
+			});
+		$("table#item-details tbody").delegate("td.disc-prcnt input", "change", function() {
+			updateRow($(this).parents("tr"));
+		});
+		
+		/**
+		 * Allow only numeric input in quantity field.
+		 */
+		//$("table#item-details tbody td.qty input").numeric();
+
+		/**
+		 * Event handler for adding a new item row.
+		 */
+		
+			
+			$("a#add-item-row").click(function(e) {
+
+				
+				populateTags() ;
+				/**
+				 * If the last row in item table is already empty,
+				 * don't add a new row.
+				 */
+				/* var rowFilled = $("table#item-details tbody tr:last").data("item-info");
+
+				var newRow = $("table#item-details tbody tr:last").clone();
+				$("table#item-details tbody").append(newRow);
+				clearRow(newRow);
+				bindTypeAhead(newRow.find("td.desc input"));
+				e.preventDefault();  */
+			});
+		
+
+		$("td#addnl-charges").on("change", function() {
+			updateTotals();
+		});
+
+		$("td.td-input input").attr("autocomplete", "off");
+
+		/**
+		 * Add today's date to invoice
+		 */
+		$("#date").text("Date: " + today());
+
+		$("#roundoff").on("change", updateTotals);
+
+		$("#interstate").on("change", function() {
+			if ($(this).is(":checked")) {
+				$("#cform").removeAttr("disabled");
+				$("#tax-heading").text("CST%");
+			} else {
+				$("#cform").prop("checked", false);
+				$("#cform").attr("disabled", true);
+				$("#tax-heading").text("VAT%");
+			}
+		});
+	
+		$("#cform").on("change", function() {
+			if ($(this).is(":checked")){
+			updateTax(true);
+			} else {
+				updateTax(false);
+			}
+		});
+
+		$("#save-new-sale").on("click", function() {
+			if (!validateForm()) {
+				return;
+			}
+			var data = prepareSaleJson('save'); // specifying action as save
+			submitSaleData(data);
+			cleartags(tags);
+		});
+	});
+
+	/**
+	 * Row delete event handler
+	 */
+	$("#item-details tbody").delegate("tr td.delete a", "click", function() {
+		//if there is only one row, no delete.
+		if ($("#item-details tbody tr").length == 1) {
+			alert("At least one item row must be present.");
+			return;
+		}
+		var result = confirm("Do you want to delete this row?");
+		if (result == true) {
+			$(this).parents("tr").remove();
+			updateTotals();
+		} else {
+
+		}
+	});
+
+
+	/**
+	 *Checks to see if all required relevant fields have been filled in.
+	 */
+	function validateForm() {
+		console.log("Executing validation.... ");
+		
+		var valid = true;
+		// Start with customer name
+		if ($("#cust-name").val() == "") {
+			showMessage("Missing Customer Name!", "danger", true);
+			$("#cust-name").addClass("red-border");
+			valid = false;
+		}
+
+		// check for payment method.
+		if ($("#payment-type-select").val() == "-1") {
+			showMessage("A payment method must be selected for this invoce!");
+			$("#payment-type-select").Class("red-border");
+			valid = false;
+		} else {
+			removeMessage();
+			$("#payment-type-select").removeClass("red-border");
+		}
+
+		var rows = $("#item-details tbody tr");
+		for (var i = 0; i < rows.length; i++) {
+			var itemData = $(rows[i]).find("td.desc input.desc");
+			var itemQty = $(rows[i]).find("td.qty input");
+			var itemRate = $(rows[i]).find("td.rate").text();
+			var itemAmount = $(rows[i]).find("td.amount").text();
+
+			if (itemData.val() == "") {
+				itemData.parents("td").addClass("red-border");
+			}
+			if (itemQty.val() == "" || isNaN(itemQty.val()) == true) {
+				itemQty.addClass("red=border");
+			}
+
+		}
+
+		if (valid)
+			removeMessage();
+		return valid;
+	}
+	function  populateTags()   {
+		console.log("ready!");
+		// var obj = JSON.parse( $.cookie("obj") );
+		var obj = new Object();
+		
+		$.ajax({
+		//	url : "responses/sale-edit.json",
+		    url : getRequestUrl(45) ,
+			async : false,
+			dataType : "json",
+			type : "POST",
+			data : {"data" : JSON.stringify(obj)},
+			timeout : 60000,
+			success : function(data) {
+				for (var i = 0; i < data.length; i++) {
+					var datum = new Object();
+					var newRow = $("table#item-details tbody tr:last").clone();
+					if (i == 0) {
+						$("table#item-details tbody tr:last").remove();
+					}
+					//	clearRow(newRow);
+					bindTypeAhead(newRow.find("td.desc input"));
+					tag = {};
+					tag.eachtag = data[i].tag;
+					tags.push(tag);
+					datum.sl_no = (i + 1);
+					datum.id = data[i].id ;
+					datum.name = data[i].name;
+					datum.catid = data[i].catid ;
+					datum.qty = data[i].qty;
+					datum.rate = data[i].rate;
+					datum.discnt_percent =data[i].disc_percent;
+					//datum.cform = data[0].items[i].cform;
+					datum.vat = data[i].vat_percent;
+
+					$(this).parents("tr").data("data-filled", true);
+					$(this).parents("tr").find("td.qty input").focus().select();
+
+					$("table#item-details tbody").append(newRow);
+
+					populateRowEdit(newRow, datum);
+				}
+
+			},
+			error : function(xhr, status, exception) {
+				$("#xfer").text("Transfer");
+				showMessage(status + ": " + xhr.status + " " + exception);
+			}
+		});
+	}	
+</script>

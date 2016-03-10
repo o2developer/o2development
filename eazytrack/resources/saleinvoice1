@@ -1,0 +1,33 @@
+{
+  "invoice": {
+    "invoice_no": "48",
+    "pur_inv_no": "9867",
+    "invoice_date": "2014-03-12",
+    "inter_state": "n",
+    "cform": "n",
+    "sub_total": "1610.57",
+    "additional": "0.00",
+    "round_off_disc": "0.00",
+    "final_total": "1699.15",
+    "pur_inv_date": "2014-03-12",
+    "goods_received_date": "2014-03-12",
+    "action": "save"
+  },
+  "customer": {
+    "cust_id": 221,
+    "name": "OLYMPIC SPORTING CO",
+    "phone": ""
+  },
+  "items": [
+    {
+      "item_id": "70",
+      "qty": "1",
+      "rate": "1999.0",
+      "discount": "299.85",
+      "amount": "1610.57",
+      "dsc_p": "15.0",
+      "vat_p": "5.5",
+      "category": "969"
+    }
+  ]
+}

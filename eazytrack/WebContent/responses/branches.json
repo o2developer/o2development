@@ -1,0 +1,22 @@
+[
+    {
+		"br_code" :  "1",
+		"br_name" :  "Main",
+		"address" : "Queens Road Sports Line"
+	},
+	{
+		"br_code" :  "2",
+		"br_name" :  "DSL",
+		"address" : "Domlur Sports Line"
+	},
+	{
+		"br_code" :  "3",
+		"br_name" :  "GSL",
+		"address" : "Ganganagar Sports Line"
+	},
+	{
+		"br_code" :  "4",
+		"br_name" :  "MSL",
+		"address" : "Mahadevapura Sports Line"
+	}
+]

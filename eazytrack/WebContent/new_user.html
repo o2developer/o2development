@@ -1,0 +1,372 @@
+<div id="stock-xfer-report-content" class="cpanel shadow cpanel-info">
+	<div class="cpanel-heading">
+		User Management
+		<a href="#" class="panel-close"><span class="glyphicon glyphicon-remove titlebar-icon pull-right"></span></a>
+		<a href="#" id="export_to_excel"><img src="resources/Microsoft-Office-Excel-icon.png" width="24" class="pull-right"/></a>
+	</div>
+	
+	
+	
+	<div class="cpanel-body">
+		<table   id="user-report"  class="table table-bordered" >
+			<thead>
+				<tr>
+				   	<th> # </th>
+					<th> Name </th>
+					<th> LoginID </th>
+					<th> Branch </th>
+					<th> Modified By </th>
+					<th> Modified On </th>
+					<th> Actions </th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td colspan="5"><img src="resources/ajax-loader.gif" /> Loading...</td>
+				</tr>
+			</tbody>
+				
+		</table>
+	</div>
+</div>
+
+	<script>
+	 $( function() {
+		var object = new Object() ;
+		$("#user-report").dataTable({
+			"bProcessing" : false,
+			"bFilter" : true,
+			"sSearch" : true,
+			//"sAjaxSource": "responses/sale-txns.json",
+			"aoData" : {
+				data : JSON.stringify(object)
+			},
+			"sAjaxSource" : getRequestUrl(35),
+			//"sDom": "t<'row'<'col-xs-6'i><'col-xs-6'p>><'row'<'col-xs-12'>>",
+			// "sDom": '<"top"i>rt<"bottom"lf><"clear">',
+
+			"aoColumnDefs" : [
+			    {
+				"bSortable" : false,
+				"aTargets" : [0]
+			}],
+			"aaSorting" : [[1, 'asc']],
+
+			"aoColumns" : [
+				 null ,
+				 null ,
+				 null ,
+				 null ,
+				 null ,
+				 null ,
+				 null
+			],
+			"aoColumnDefs" : [ {
+				"aTargets" : [6],
+				"mData" : function( source, type, val ) {
+					var colData = "<a href='#' class='action-edit'><i class='fa fa-edit' title='Edit User'></i> </a> ";
+					colData += "<a href='#' class='action-delete'><i class='fa fa-trash-o' title='Delete User'></i></a>";
+					return colData;
+				}
+			}],
+			"fnCreatedRow" : function(nRow, aData, iDataIndex) {
+			  //   invoiceTooltip($("td:eq(0)", nRow), aData[3]);
+				 userdelete ($("td:last a.action-delete", nRow), aData ) ;
+				 bindQTip($("td:last a.action-edit", nRow), aData[2]);
+			}, 
+			"fnServerData" : function(sSource, aoData, fnCallback, oSettings) {
+				oSettings.jqXHR = $.ajax({
+					"dataType" : "json",
+					"url" : sSource,
+					"data" : {
+						data : JSON.stringify(object)
+					},
+					"success" : function(data) {
+						//do your stuff here
+						data = transformSales2Array(data);
+						//finally call the original fn.
+						fnCallback(data);
+					}
+				});
+			} ,
+			
+			"fnFooterCallback" : function(nRow, aaData, iStart, iEnd, aiDisplay) {
+				var amount_total = 0;
+				for (var i = 0 ; i < aaData.length ; i++) {
+					amount_total += parseFloat(aaData[i][5]);
+				}
+				$("#user-report tfoot tr td#amount_total").text(amount_total.toFixed(2));
+			}
+	
+		});
+	});
+	
+	/**
+	 *	Converts sales-report.json data to array form recognizable by dataTables.
+	 */
+	function transformSales2Array(data) {
+		var result = new Object();
+		result.aaData = [];
+		for (var i = 0; i < data.length; i++) {
+			var array = [];
+			//array.push("");
+			array.push(i + 1);
+			array.push(data[i].name);
+			array.push(data[i].login_id);
+			array.push(data[i].branch);
+			array.push(data[i].modified_by);
+			array.push(data[i].modified_on);
+	
+		//	array.push("");
+		//	array.push("");
+			result.aaData.push(array);
+		}
+		return result;
+	}
+	
+	
+	
+
+		$("#export_to_excel").on("click", function(e) {
+			e.preventDefault();
+			//var html = $("<div />").append($('#sales-report-table').clone()).html();
+			var html = prepareExportTable();
+			window.open('data:application/vnd.ms-excel,' + encodeURIComponent(html));
+		});
+	// End of function
+
+	function userdelete(element, aData) {
+		
+			var objres = new Object();
+
+			var nTr = $(this).parents('tr')[0];
+		//	 var aData = oTable.fnGetData(nTr);
+		     var aData = aData ;
+			var obj = new Object();
+			obj.rowData = aData[3];
+
+			
+			$(element).on("click", function() {
+			if ($('#to-branch').val() !== null && $('#to-branch').val() !== "") {
+				obj.branch = $('#to-branch').val();
+			} else {
+				obj.branch = $.cookie("brCode");
+			}
+			obj.action = "reject";
+
+			objres.action = "reject";
+			objres.invoice = obj;
+
+
+			$.ajax({
+				//url : getRequestUrl(6),
+				url : "/eazytrack/EzTrackServlet?opcode=27",
+				async : true,
+				dataType : "json",
+				type : "POST",
+				data : {
+					"data" : JSON.stringify(objres)
+				},
+				timeout : 60000,
+				success : function(data) {
+					if (data.result == 0) {
+						alert('Deleted Successfully !');
+					}
+				},
+
+				error : function(xhr, status, exception) {
+					$("#xfer").text("Transfer");
+					showMessage(status + ": " + xhr.status + " " + exception);
+				}
+			});
+			
+			var rejson = new Object();
+			reloadTable(rejson);
+			});   // End of on click
+		
+	}
+
+		/*
+		 *  Reloading a table upon applying some filter.
+		*/
+
+		function reloadTable ( result ) {
+			var oTable =  $('#user-report').dataTable();
+			oTable.fnFilter(result);
+		}
+
+	/**
+	 * Binds a popover tooltip to show the .
+	 */
+	function bindQTip(element, login_id) {
+		var data = {} ;
+		data.login_id =  login_id;
+		data.branch = $.cookie("brCode");
+		data.name ="hover";
+		$(element).qtip({
+			content : {
+				text : "<img src='resources/ajax-loader.gif'> loading...",
+				title : "User Details " + data.login_id,
+				ajax : {
+					url : getRequestUrl(35),
+					type : "POST",
+					dataType : "json",
+					data : { "data" :  JSON.stringify(data)} ,
+					success : function(content) {
+						this.set('content.text', formatStockHistory(content));
+					},
+					error : function(xhr, status, error) {
+						// Upon failure... set the tooltip content to the status and error value
+						this.set('content.text', status + ': ' + error);
+					}
+				},
+				button : true
+			},
+			style : {
+				width : "500px",
+				//classes: "q2tip qtip-shadow"
+				classes : "qtip-bootstrap qtip-shadow"
+			},
+			position : {
+				my : "right center",
+				at : "bottom left",
+				target : $(element)
+			},
+			show : "click",
+			hide : "unfocus"
+
+		});
+	}
+
+	/**
+	 * Formats the user history as a html table.
+	 */
+	function formatStockHistory(data) {
+		//var pass;
+	 	for ( var i=0 ; i<data.length; i++ ) { 
+		var html ="<form id='user-creation-form' class='form-horizontal' role='form'>";
+		html +="<div class='form-group'>";
+		html +="<label for='user-name' class='col-sm-5 control-label'>User Name</label>";
+		html +="<div class='col-sm-5'>";
+		html +="<input type='text' class='form-control' id='name' value='" + data[i].name + "' placeholder='Enter User Name'>";
+		html +="</div>";
+		html +="</div>";
+		html +="<div class='form-group'>";
+		html +="<label for='login-id' class='col-sm-5 control-label'>Login ID</label>";
+		html +="<div class='col-sm-5'>";
+		html +="	<input type='text' class='form-control' id='login_id' value='"+data[i].login_id+"' placeholder='Enter User ID'>";
+		html +="</div>";
+		html +="</div>";
+		html +="<div class='form-group'>";
+		html +="	<label for='branch_id' class='col-sm-5 control-label'>Branch Id</label>";
+		html +="<div class='col-sm-5'>";
+		html +="<input type='number' class='form-control' id='branch' value='"+data[i].branch+"' onkeydown='allowNumbers(event)' placeholder='Enter Branch Id'>";
+		html +="</div>";
+		html +="</div>";
+		html +="<div class='form-group'>";
+		html +="	<label for='modifeid_by' class='col-sm-5 control-label'>Modified By</label>";
+		html +="<div class='col-sm-5'>";
+		html +="<input type='text' class='form-control' id='modified_by' value='"+data[i].modified_by+"'>";
+		html +="</div>";
+		html +="</div>";
+		html +="<div class='form-group'>";
+	//	html +="	<label for='modifeid_by' class='col-sm-5 control-label'>Modified By</label>";
+		html +="<div class='col-sm-5'>";
+		html +="<input type='hidden' class='form-control' id='modified_on' value='"+data[i].modified_on+"'>";
+		html +="</div>";
+		html +="</div>";
+		html +="<div class='form-group'>";
+		//html +="	<label for='modifeid_by' class='col-sm-5 control-label'>Modified By</label>";
+		html +="<div class='col-sm-5'>";
+		html +="<input type='hidden' class='form-control' id='password' value='"+data[i].password+"'>";
+		html +="</div>";
+		html +="</div>";
+		html +="<button type='button' id='save-user' style='margin-left:250px' onclick='validateuserCreation()' class='btn btn-success btn-sm pull-middle'>Update</button>";
+		html +="</form>";
+		//pass=data[i].password;
+	 	}
+	
+		return html ;
+	}
+	
+	/* $(function() {
+		alert('hiiii');
+		$("#save-user").on("click", function() {
+			
+			if (validateuserCreation()) {
+				doSaveUser();
+				
+			}
+		});
+	}); */
+	function validateuserCreation() {
+		var isValid = true;
+		if ($("#name").val() == "") {
+			isValid = false;
+			showMessage("user name is required.", "danger", true);
+		} else if ($("#login_id").val() == "") {
+			isValid = false;
+			showMessage("user id is required.", "danger", true);
+		}	else if ($("#branch").val() == "") {
+			isValid = false;
+			showMessage("user Branch_id is required.", "danger", true);
+		}else if ($("#modified_by").val() == "") {
+			isValid = false;
+			showMessage("user Modified_by is required.", "danger", true);
+		}
+		 
+		if (!isValid) {
+			$("html").scrollTop(0);
+		} else {
+			removeMessage();
+		}
+		
+		if(isValid){
+			doSaveUser();
+		}
+	//	return isValid;
+		
+	}
+
+	function doSaveUser() {
+	   debugger ;	
+		var o = {};
+		o.name = $("#name").val();
+		o.login_id = $("#login_id").val();
+		o.password = $("#password").val();
+		o.branch = $("#branch").val();
+		o.modified_by = $("#modified_by").val();
+		o.modified_on = $("#modified_on").val();
+		
+		//var data = serializeItem();
+		//console.log("j,lujl"+data);
+		var oldText = $("#save-user").text();
+		$("#save-user").data("old-text", oldText);
+		$("#save-user").text("Saving...");
+		$
+		.ajax({
+			url : getRequestUrl(26),
+			type : "POST",
+			dataType : "json",
+			timeout : 20000,
+			data : {
+				data : JSON.stringify(o)
+			},
+			success : function(data) {
+				if (data.result==0) {
+				alert("updating user");
+				$("#user-creation-form")[0].reset();
+				}else {
+					alert(data.desc);
+				}
+			},
+			error : function(xhr, status, text) {
+				alert("Error while saving item: " + status + ":" + text);
+			},
+			complete : function() {
+				$("#save-user").text($("#save-user").data("old-text"));
+			}
+		});
+	}
+
+</script>

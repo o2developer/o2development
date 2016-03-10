@@ -1,0 +1,81 @@
+[
+	{
+		"id": "94",
+		"category": "bats",
+		"rate": 1600,
+		"discnt_percent": 5.5,
+		"name": "MRF Bat",
+		"code": "91",
+		"catid": "1",
+		"cost": "1500",
+		"taxes": "14.5",
+		"units": "nos",
+		"qty": "100",
+		"vat": "5"
+	}, {
+		"id": "91",
+		"category": "Sports Wear",
+		"rate": 2400,
+		"discnt_percent": 5.5,
+		"name": "Sports Shoes",
+		"code": "8906017290040",
+		"catid": "1",
+		"cost": "1500",
+		"taxes": 14.5,
+		"units": "nos",
+		"qty": "1565",
+		"vat": "5"
+	}, {
+		"id": "92",
+		"category": "Sports Wear",
+		"rate": 670,
+		"discnt_percent": 5.5,
+		"name": "T-Shirt",
+		"code": "8902532210099",
+		"catid": 1,
+		"cost": 639,
+		"taxes": 14.5,
+		"units": "nos",
+		"qty": "2400",
+		"vat": "5"
+	}, {
+		"id": "93",
+		"category": "Sports Wear",
+		"rate": 1250,
+		"discnt_percent": 5.5,
+		"name": "Sun Glasses",
+		"code": "91878",
+		"catid": 1,
+		"cost": 1050,
+		"taxes": 14.5,
+		"units": "nos",
+		"qty": "35",
+		"vat": "5"
+	}, {
+		"id": "94",
+		"category": "Gymnastics",
+		"rate": 250,
+		"discnt_percent": 5.5,
+		"name": "Skipping Rope",
+		"code": "91879",
+		"catid": 2,
+		"cost": 50,
+		"taxes": 14.5,
+		"units": "nos",
+		"qty": 14,
+		"vat": "5"
+	}, {
+		"id": "104",
+		"category": "Indoor Games",
+		"rate": 125,
+		"discnt_percent": 5.5,
+		"name": "Chess Board",
+		"code": "91880",
+		"catid": 3,
+		"cost": 100,
+		"taxes": 14.5,
+		"units": "nos",
+		"qty": "5",
+		"vat": "5"
+	}
+]

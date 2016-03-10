@@ -1,0 +1,36 @@
+[
+    {
+		"txn_number" : 1,
+		"dc_no" : 12123,
+		"date" : "04-01-2014",
+		"from_branch" : 1,
+		"items" : [
+			{ 
+				"id" : 22,
+				"code" : "555",
+				"desc" : "Swim suite",
+				"qty" : 5
+			},
+			{ 
+				"id" : 23,
+				"code" : "666",
+				"desc" : "Swim suite men's wear",
+				"qty" : 5
+			}
+		]
+	},
+    {
+    	"txn_number" : 2,
+		"dc_no" : 12131,
+		"date" : "04-01-2014",
+		"from_branch" 1 ,
+		"items" : [
+			{
+				"id" : 422,
+				"code" : "786",
+				"desc" : "dumbells 100 kg weight",
+				"qty" : 50
+			}
+		]
+	}
+]

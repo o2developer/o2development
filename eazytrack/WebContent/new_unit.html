@@ -1,0 +1,270 @@
+<div id="stock-xfer-report-content" class="cpanel shadow cpanel-info">
+	<div class="cpanel-heading">
+		Units Management
+		<a href="#" class="panel-close"><span class="glyphicon glyphicon-remove titlebar-icon pull-right"></span></a>
+		<a href="#" id="export_to_excel"><img src="resources/Microsoft-Office-Excel-icon.png" width="24" class="pull-right"/></a>
+	</div>
+	
+	
+	
+	<div class="cpanel-body">
+		<table   id="unit-report"  class="table table-bordered" >
+			<thead>
+				<tr>
+				 	<th> # </th>
+					<th> Name </th>
+					<th> Description </th>
+					<th> Actions </th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td colspan="5"><img src="resources/ajax-loader.gif" /> Loading...</td>
+				</tr>
+			</tbody>
+
+		</table>
+	</div>
+</div>
+
+	<script>
+	 $( function() {
+		var object = new Object() ;
+		$("#unit-report").dataTable({
+			"bProcessing" : false,
+			"bFilter" : true,
+			"sSearch" : true,
+			//	"sAjaxSource": "responses/sale-txns.json",
+			"aoData" : {
+				data : JSON.stringify(object)
+			},
+			"sAjaxSource" : getRequestUrl(24),
+			//"sDom": "t<'row'<'col-xs-6'i><'col-xs-6'p>><'row'<'col-xs-12'>>",
+			// "sDom": '<"top"i>rt<"bottom"lf><"clear">',
+
+			"aoColumnDefs" : [
+			    {
+				"bSortable" : false,
+				"aTargets" : [0]
+			}],
+			"aaSorting" : [[1, 'asc']],
+
+			"aoColumns" : [
+				 null ,
+				 null ,
+				 null ,
+				 null
+			
+			
+			],
+			"aoColumnDefs" : [ {
+				"aTargets" : [3],
+				"mData" : function( source, type, val ) {
+					var colData = "<a href='#' class='action-edit'><i class='fa fa-edit' title='Edit Unit'></i> </a> ";
+					colData += "<a href='#' class='action-delete'><i class='fa fa-trash-o' title='Delete Unit'></i></a>";
+					return colData;
+				}
+			}],
+			"fnCreatedRow" : function(nRow, aData, iDataIndex) {
+			    // invoiceTooltip($("td:eq(0)", nRow), aData[1]);
+			     userdelete ($("td:last a.action-delete", nRow), aData ) ;
+				 bindQTip($("td:last a.action-edit", nRow), aData[0]);
+			},
+			"fnServerData" : function(sSource, aoData, fnCallback, oSettings) {
+				oSettings.jqXHR = $.ajax({
+					"dataType" : "json",
+					"url" : sSource,
+					"data" : {
+						data : JSON.stringify(object)
+					},
+					"success" : function(data) {
+						//do your stuff here
+						data = transformSales2Array(data);
+						//finally call the original fn.
+						fnCallback(data);
+					}
+				});
+			} ,
+			
+			"fnFooterCallback" : function(nRow, aaData, iStart, iEnd, aiDisplay) {
+			
+			}
+	
+		});
+	});
+	
+	/**
+	 *	Converts sales-report.json data to array form recognizable by dataTables.
+	 */
+	function transformSales2Array(data) {
+		var result = new Object();
+		result.aaData = [];
+		for (var i = 0; i < data.length; i++) {
+			var array = [];
+		//	array.push("");
+			array.push(i + 1);
+			array.push(data[i].name);
+			array.push(data[i].description);
+			//array.push("");
+			result.aaData.push(array);
+		}
+		return result;
+	}
+	
+	
+
+		$("#export_to_excel").on("click", function(e) {
+			e.preventDefault();
+			//var html = $("<div />").append($('#sales-report-table').clone()).html();
+			var html = prepareExportTable();
+			window.open('data:application/vnd.ms-excel,' + encodeURIComponent(html));
+		});
+
+	// End of function
+	
+	
+	
+function userdelete(element, aData) {
+	
+}
+
+
+
+/**
+ * Binds a popover tooltip to show the data (history) for a stock item.
+ */
+function bindQTip(element, id) {
+	var data = {} ;
+	data.id_no =  id;
+	data.name ="hover";
+	$(element).qtip({
+		content : {
+			text : "<img src='resources/ajax-loader.gif'> loading...",
+			title : "unit Details " + data.id_no,
+			ajax : {
+				url : getRequestUrl(24),
+				type : "POST",
+				dataType : "json",
+				data : { "data" :  JSON.stringify(data)} ,
+				success : function(content) {
+					this.set('content.text', formatStockHistory(content));
+				},
+				error : function(xhr, status, error) {
+					// Upon failure... set the tooltip content to the status and error value
+					this.set('content.text', status + ': ' + error);
+				}
+			},
+			button : true
+		},
+		style : {
+			width : "500px",
+			//classes: "q2tip qtip-shadow"
+			classes : "qtip-bootstrap qtip-shadow"
+		},
+		position : {
+			my : "right center",
+			at : "bottom left",
+			target : $(element)
+		},
+		show : "click",
+		hide : "unfocus"
+
+	});
+}
+
+/**
+ * Formats the user history as a html table.
+ */
+function formatStockHistory(data) {
+	for ( var i=0; i<data.length; i++ ) {
+var html ="<form id='user-creation-form' class='form-horizontal' role='form'>";
+	html +="<div class='form-group'>";
+	//html +="<label for='user-name' class='col-sm-5 control-label'>Unit Name</label>";
+	html +="<div class='col-sm-5'>";
+	html +="<input type='hidden' class='form-control' id='id' value='" + data[i].id + "' placeholder='Enter User Name'>";
+	html +="</div>";
+	html +="</div>";
+	html +="<div class='form-group'>";
+	html +="<label for='user-name' class='col-sm-5 control-label'>Unit Name</label>";
+	html +="<div class='col-sm-5'>";
+	html +="<input type='text' class='form-control' id='name' value='" + data[i].name + "' placeholder='Enter User Name'>";
+	html +="</div>";
+	html +="</div>";
+	html +="<div class='form-group'>";
+	html +="<label for='login-id' class='col-sm-5 control-label'>Description</label>";
+	html +="<div class='col-sm-5'>";
+	html +="	<input type='text' class='form-control' id='description' value='"+data[i].description+"' placeholder='Enter User ID'>";
+	html +="</div>";
+	html +="</div>";
+	html +="<button type='button' id='save-user' onclick='validateuserCreation()' style='margin-left:250px' class='btn btn-success btn-sm pull-middle'>";
+	html +="Update";
+	html +="</button>";
+/*  html +="<button type='button' id='cancel' class='btn btn-default btn-sm pull-right'>";
+	html +="Cancel"; 
+	html +="</button>";*/
+	html +="</form>";
+
+	}	
+
+	return html ;
+}
+	
+	
+	
+function validateuserCreation() {
+	var isValid = true;
+	if ($("#name").val() == "") {
+		isValid = false;
+		showMessage("user name is required.", "danger", true);
+	} else if ($("#description").val() == "") {
+		isValid = false;
+		showMessage("user id is required.", "danger", true);
+	}
+	 
+	if (!isValid) {
+		$("html").scrollTop(0);
+	} else {
+		removeMessage();
+	}
+	
+	if(isValid){
+		doSaveUser();
+	}
+//	return isValid;
+	
+}
+
+function doSaveUser() {
+	var o = {};
+	o.id = $("#id").val();
+	o.name = $("#name").val();
+	o.description = $("#description").val();
+	console.log(o);
+	var oldText = $("#save-user").text();
+	$("#save-user").data("old-text", oldText);
+	$("#save-user").text("Saving...");
+	$.ajax({
+		url : getRequestUrl(41),
+		dataType : "json",
+		type : "POST",
+		data : {
+			data : JSON.stringify(o)
+		},
+		success : function(data) {
+			if (data.result==0) {
+		//	alert("updating unit");
+			$("#user-creation-form")[0].reset();
+			}else {
+				alert(data.desc);
+			}
+		},
+		error : function(xhr, status, text) {
+			alert("Error while saving item: " + status + ":" + text);
+		},
+		complete : function() {
+			$("#save-user").text($("#save-user").data("old-text"));
+		}
+	});
+}
+
+</script>

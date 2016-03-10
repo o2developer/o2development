@@ -1,0 +1,150 @@
+<div id="item-list-dialog">
+	<table id="item-list-table" width="100%" class="table table-bordered">
+		<thead>
+			<tr>
+				<th width="5"></th>
+				<th class="code">Code</th>
+				<th>Item Description</th>
+				<th>Qty</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td colspan="3" style="text-align:center"><img src="resources/ajax-loader.gif"/></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+<script>
+	$(function() {
+
+		$("#item-list-dialog").dialog({
+			autoOpen : false,
+			height : 300,
+			width : 400,
+			modal : true,
+			title : "Item Selector",
+			buttons : {
+				"Select" : function() {
+					var datum = getRowDatum();
+					var invoker = $("#item-list-dialog").data("invoker");
+					populateRow($(invoker).parents("tr"), datum);
+					$(this).dialog("close");
+				}
+			},
+			open : function() {
+				/**
+				 *	Add an inputbox to the footer element, so it can be
+				 *  used for searching items
+				 */
+				var footer = $("#item-list-dialog").parent().find(".ui-dialog-buttonpane .ui-dialog-buttonset");
+				footer.parent().find(".item-search").remove();
+				footer.before("<input type='text' class='item-search custom-sridama pull-down'>");
+				footer.parent().find(".item-search").focus();
+				footer.parent().find(".item-search").on("keyup", function(e) {
+					$("#item-list-table").dataTable().fnFilter($(this).val());
+				});
+			}
+		});
+
+		$("#item-list-dialog").on("keydown", function(e) {
+			console.log("key: " + e.which);
+		});
+
+		$("#item-list-table").dataTable({
+			"bProcessing" : false,
+			"bPaginate" : false,
+			//"sAjaxSource" : "responses/item-list-original.json",
+			"sAjaxSource" : "/eazytrack/EzTrackServlet?opcode=3&data={}",
+			"sDom" : "t",
+			"aoColumns" : [null, // for checkbox (selection/deselection)
+			null, // item code
+			null, // description/name
+			null, // quantity
+			{
+				"bSearchable" : false,
+				"bVisible" : false
+			}, {
+				"bSearchable" : false,
+				"bVisible" : false
+			}, {
+				"bSearchable" : false,
+				"bVisible" : false
+			}, {
+				"bSearchable" : false,
+				"bVisible" : false
+			}, {
+				"bSearchable" : false,
+				"bVisible" : false
+			}, {
+				"bSearchable" : false,
+				"bVisible" : false
+			}, {
+				"bSearchable" : false,
+				"bVisible" : false
+			}, {
+				"bSearchable" : false,
+				"bVisible" : false
+			}],
+			"fnServerData" : function(sSource, aoData, fnCallback, oSettings) {
+
+				oSettings.jqXHR = $.ajax({
+					"dataType" : "json",
+					"url" : sSource,
+					"data" : aoData,
+					"success" : function(data) {
+						//do your stuff here
+						data = transform2DataTableFormat(data);
+						//finally call the original fn.
+						fnCallback(data);
+					}
+				});
+			}
+		});
+
+		/* Single click on a row should select an item */
+		$("#item-list-table tbody").delegate("tr", "click", function() {
+			console.log("clicking..."); 
+			var prevRow = $(this).parent().find("tr.selected-row");
+			prevRow.removeClass("selected-row");
+			prevRow.find("td:first i").remove();
+			$(this).addClass("selected-row");
+			$(this).find("td:first").html("<i class='fa fa-check'></i>");
+		});
+
+		/* dblclick shd select and close the dialog */
+		$("#item-list-table tbody").delegate("tr", "dblclick", function() {
+			//$(this).trigger("click");
+			$("#item-list-dialog").parent().find("button.ui-button").trigger("click");
+		});
+
+		/**
+		 * Returs the data of selected row as a datum (json) 
+		 */
+		function getRowDatum() {
+			
+			var oTable = $("#item-list-table").dataTable().dataTable();
+			var row = $("#item-list-table tbody tr.selected-row");
+			//var Pos = oTable.fnGetPosition(row[0]);
+			var aData = oTable.fnGetData(row[0]);
+			var o = new Object();
+			o.code = aData[1];
+			o.name = aData[2];
+			o.qty = aData[3];
+			o.id = aData[4];
+			o.category = aData[5];
+			o.rate = aData[6];
+			o.discnt_percent= aData[7];
+			o.catid = aData[8];
+			o.cost = aData[9];
+			o.taxes = aData[10];
+			o.units = aData[11];
+			o.vat = aData[12];
+			
+			return o;
+		}
+
+	});
+
+</script>

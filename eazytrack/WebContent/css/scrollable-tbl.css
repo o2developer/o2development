@@ -1,0 +1,26 @@
+.tbl-head,.tbl-body{width:100%} /*<-- play width this width*/
+.tbl-body{*width:383px;_width:100%} /*ie7 fix: width -= 17px*/
+//table.scrollable{border-collapse:collapse;table-layout:fixed;width:100%;_width:auto}
+
+//.tbl-body{overflow:scroll;overflow-x:hidden;*padding-right:17px;_padding-right:0} /*ie7 fix:padding to 17px*/
+.fix{width:16px;*width:17px;_width:16px}
+@media screen and (-webkit-min-device-pixel-ratio:0){.fix{width:17px}}
+
+//th,td{width:4.7em}
+
+.grow{width:auto}
+.tbl-body {
+	max-height: 200px;	//5.75em;
+	min-height:100px;	//2em;
+	padding-bottom:0.8em;
+	//_height:10em;
+	margin-bottom:10px;	//1em;
+	border:1px solid #CECECE;
+	//overflow: scroll;
+	overflow-x:hidden;
+	//width: 100%;
+}
+
+.tbl-head > .table {
+	margin-bottom: 0px;
+}

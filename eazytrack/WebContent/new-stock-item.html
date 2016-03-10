@@ -1,0 +1,607 @@
+<div id="canvas" class="cpanel cpanel-info shadow">
+	<div class="cpanel-heading">
+		Stock Item Creation 
+		<a href="#" class="panel-close"><span class="glyphicon glyphicon-remove titlebar-icon pull-right"></span></a>
+	</div>
+	<div class="cpanel-body" >
+		<form id="stock-creation-form" class="form-horizontal" role="form">
+			<div class="form-group">
+				<label for="item-code" class="col-sm-5 control-label">Item Code</label>
+				<div class="col-sm-5">
+					<input type="text" class="form-control" id="item-code" placeholder="Enter Item Code" disabled>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="item-name" class="col-sm-5 control-label">Item Name</label>
+				<div class="col-sm-5">
+					<input type="text" class="form-control" id="item-name" placeholder="Enter Item Name">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="item-category" class="col-sm-5 control-label">Item Category</label>
+				<div class="col-sm-5">
+					<!-- <input type="text" class="form-control" id="item-category" placeholder="Choose Item Category"> -->
+
+					<div class="cpanel" id="categories">
+						<div class="cpanel-heading" tabindex="0">
+							<p class="inline">
+								select
+							</p>
+							<a href="#" class="pull-right panel-toggler"> <span class="glyphicon glyphicon-chevron-up"> </span> </a>
+							<span class=""> </span>
+						</div>
+						<div class="cpanel-body" id="categoryid"></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="item-cost" class="col-sm-5 control-label">Item Cost</label>
+				<div class="col-sm-5">
+					<input type="number" min="1" class="form-control" id="item-cost" onkeydown="allowNumbers(event)" placeholder="Enter Item Cost">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="item-price" class="col-sm-5 control-label">Max. Retail Price (MRP)</label>
+				<div class="col-sm-5">
+					<input type="number" class="form-control" id="item-price" onkeydown="allowNumbers(event)" placeholder="Enter Item Price">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="item-tax-rate" class="col-sm-5 control-label">Tax applicable</label>
+				<div class="col-sm-5">
+					<!-- <input type="number" class="form-control" id="item-tax-rate" placeholder="Enter Tax Rate "> -->
+					<select class="form-control" id="item-tax-rate" placeholder="Enter Tax Rate">
+						<option value="-1" default="selected">Choose Tax Rate</option>
+						<!-- <option value=""></option>
+						<option value=""></option> -->
+					</select>
+
+				</div>
+				<div class="col-sm-1 no-left-margin">
+					<a id="new-tax-rate" href="#"> <i class="fa fa-plus-circle big pull-down"></i> </a>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="item-discount-rate" class="col-sm-5 control-label">Discount applicable</label>
+				<div class="col-sm-5">
+					<select class="form-control" id="item-discount-rate" placeholder="Enter Tax Rate">
+						<option value="-1" default ="selected">Choose Discount Rate </option>
+					</select>
+				</div>
+				<div class="col-sm-1 no-left-margin">
+					<a id="new-discount-rate" href="#"> <i class="fa fa-plus-circle big pull-down"></i> </a>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="item-op-stock" class="col-sm-5 control-label">Opening Stock</label>
+				<div class="col-sm-5">
+					<!-- <input type="number" onkeydown="allowNumbers(event)" class="form-control" id="item-op-stock" placeholder="Enter Opening Stock"> -->
+					<div id="bw-stock" class="cpanel">
+						<div class="cpanel-heading">
+							Branch wise stock <a href='#'><span class="glyphicon glyphicon-chevron-up pull-right"></span></a>
+						</div>
+						<div class="cpanel-body">
+							<table id="branch-wise-stock" class="table table-bordered">
+								<thead>
+									<tr>
+										<th width="70%">Branch</th>
+										<th width="30%">Stock</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="units-list" class="col-sm-5 control-label">Units</label>
+				<div class="col-sm-5">
+					<!-- <input type="number" onkeydown="allowNumbers(event)" class="form-control" id="item-op-stock" placeholder="Enter Opening Stock"> -->
+					<select class="form-control" id="units-list" placeholder="Select Unit">
+						<option value="" default selected>Choose a Unit</option>
+					</select>
+				</div>
+				<div class="col-sm-1 no-left-margin">
+					<a id="new-unit" href="#"> <i class="fa fa-plus-circle big pull-down"></i> </a>
+				</div>
+			</div>
+		</form>
+		<hr>
+		<button type="button" id="save-stock-item" class="btn btn-success btn-sm pull-right">
+			Save
+		</button>
+		<button type="button" id="cancel" class="btn btn-default btn-sm pull-right">
+			Cancel
+		</button>
+		<div class="clearfix"></div>
+	</div>
+</div>
+
+<script>
+		
+	$(function() {
+
+		getNewItemCode();
+		loadCategories();
+
+		$("#categories .cpanel-body").delegate("label, a", "click", function(e) {
+			e.preventDefault();
+			$("#categories .cpanel-heading p").text("Selected: [" + $(this).text() + "]");
+			$("div#categories").data("value", $(this).closest("li").attr("id"));
+			$("#categoryid").hide();
+		});
+
+		loadTaxSlabs();
+		loadDiscountSlabs();
+
+		/**
+		 * Stock item save event handler.
+		 */
+		$("#save-stock-item").on("click", function() {
+			/* $("#stock-creation-form")[0].reset();
+			document.getElementById("stock-creation-form").reset(); */
+		/* 	if (validateStockCreation()) {
+				if ($("#item-tax-rate").val() == "-1") {
+					console.log("into here")
+					isValid = false;
+					showMessage("Item tax rate is required.", "danger", true);
+					return;
+				} else if ($("#item-discount-rate").val() == "-1") {
+					console.log("into here there")
+					isValid = false;
+					showMessage("Item discount rate is required.", "danger", true);
+					return; */
+		//		}
+					if (validateStockCreation()) {
+							doSaveStockItem();
+					}
+		//	}
+				
+		});
+		
+		$("#cancel").on("click", function(){
+			location.reload();
+		});
+
+		$("div#categories").delegate("label.node, li.leaf", "mouseenter mouseleave", function(e) {
+			$(this).find("a:last > i").toggleClass("new-category-hidden new-category-shown");
+		});
+
+		$("div#categories").delegate("i.fa-plus-circle", "click", function() {
+			var newCategory = prompt("Enter new Category:");
+			if (newCategory != null) {
+				addNewCategory(newCategory, $(this).closest("li").attr("id"));
+			}
+		});
+
+		$(".panel-toggler").on("click", function(e) {
+			e.preventDefault();
+			$(this).parents("div#categories.cpanel").find(".cpanel-body").slideToggle("fast");
+			$(this).find("span").toggleClass("glyphicon-chevron-up glyphicon-chevron-down");
+		});
+
+		$("table#op-stock thead tr a").click(function(e) {
+			e.preventDefault();
+			$("table#op-stock tbody").slideToggle("slow");
+			$(this).find("i").toggleClass("fa-minus-square fa-plus-square");
+		});
+
+		$("div#bw-stock.cpanel > .cpanel-heading > a").on("click", function(e) {
+			e.preventDefault();
+			$(this).closest("div.cpanel").find(".cpanel-body").slideToggle("fast");
+			$(this).find("span").toggleClass("glyphicon-chevron-up glyphicon-chevron-down");
+		});
+
+		// load units.
+		//$("#units-list")
+		$.ajax({
+			url : getRequestUrl(24),
+			dataType : "json",
+			success : function(data) {
+				var html = "";
+				for (var i = 0; i < data.length; i++) {
+					html += "<option value='" + data[i].id + "'>" + data[i].name + "</option>";
+				}
+				$("#units-list").append(html);
+			},
+			error : function(xhr, status, text) {
+				console.log("Error while retrieving Units list." + status + ":" + text);
+			}
+		});
+
+		/* click evt handler for new tax rate */
+		$("#new-tax-rate").on("click", function(e) {
+			e.preventDefault();
+			addNewItem($("#item-tax-rate"), "Tax Rate");
+		});
+
+		/* click evt handler for new discount rate */
+		$("#new-discount-rate").on("click", function(e) {
+			e.preventDefault();
+			addNewItem($("#item-discount-rate"), "Discount Rate");
+		});
+
+		/* click evt handler for new unit */
+		$("#new-unit").on("click", function(e) {
+			e.preventDefault();
+			addNewItem($("#units-list"), "Unit Type");
+		});
+		
+		/* appending .00 for cos if the cost has no a decimal places*/
+		 $("#item-cost").on("focusout", function(e) {
+			 var value= $("#item-cost").val();
+			 if(value.match("0") && value.length == 1){
+				 showMessage("please enter some value other than zero", "danger", true);
+				 return;
+			 }
+			 else if(value == ""){
+				 showMessage("please enter some value", "danger", true);
+				}
+			 else if(!value.contains(".") && value !="")
+			 	value = $("#item-cost").val()+".00";
+			 $("#item-cost").val(value);
+			
+					
+		});	
+		
+		 $("#item-price").on("focusout", function(e) {
+			 var value= $("#item-price").val();
+			 if(value.match("0") && value.length == 1){
+				 showMessage("please enter some value other than zero", "danger", true);
+				 return;
+			 }
+			 else if(value == ""){
+				 showMessage("please enter some value", "danger", true);
+				}
+			 else if(!value.contains(".") && value !="")
+			 	value = $("#item-price").val()+".00";
+			 $("#item-price").val(value);
+			
+					
+		});	
+
+		 $("#item-cost").on("keydown", function(e) {
+			 var value= $("#item-cost").val();
+			 if(value == null){
+				 console.log("please enter some value");
+				 showMessage("please enter some value", "danger", true);
+				 return;
+			 }
+			 if(value.substring(0,1) == "."){
+				 console.log("error");
+				 showMessage("starting '.' should not be there", "danger", true);
+				return;
+			 }
+			 if(value.substring(value.length-1,value.length) == "."){
+				 console.log("error");
+				 showMessage("ending '.' should not be there", "danger", true);
+					return;
+			}
+			 if (1 < value.match(/\./g).length) {
+				
+				 showMessage("double dots found", "danger", true);
+				 console.log("double dots found");
+				 return;
+				 
+				}
+			 
+		 }); 
+		 $("#item-price").on("keydown", function(e) {
+			 var value= $("#item-cost").val();
+			 if(value == null ){
+				 console.log("please enter some value");
+				 showMessage("please enter some value", "danger", true);
+				 return;
+			 }
+			 if(value.substring(0,1) == "."){
+				 console.log("error");
+				 showMessage("starting '.' should not be there", "danger", true);
+				return;		
+			 }
+			 if(value.substring(value.length-1,value.length) == "."){
+				 console.log("error");
+				 showMessage("ending '.' should not be there", "danger", true);
+					return;
+			}
+			 if (1 < value.match(/\./g).length) {
+				
+				 showMessage("double dots found", "danger", true);
+				 console.log("double dots found");
+				 return;
+				 
+				}
+			 
+		 }); 
+
+
+		/** Load branches list **/
+		loadBranches();
+	});
+
+	function loadCategories() {"use strict";
+		var url = getRequestUrl(20);
+		$.ajax({
+			//url : "responses/categories.json",
+			url : url,
+			dataType : "json",
+			success : function(data) {
+
+				console.log("loading success.");
+				var tree = "<div class='css-treeview'>";
+				for (var i = 0; i < data.length; i++) {
+					tree += createTree(data[i]);
+				}
+				tree += "</div>";
+				$("#categories .cpanel-body").html(tree);
+			},
+			error : function(xhr, status, text) {
+
+				console.log("error while retrieving categories: " + status + ":" + text);
+			}
+		});
+	}
+
+	function createTree(data) {
+		var list = "";
+		if (data.children == undefined) {
+			list += "<li id='" + data.category_id + "' class='leaf'><a href='#'>" + data.name + "</a>";
+			list += "<a href='#' class='leaf'><i class='fa fa-plus-circle new-category-hidden' data-title='New'></i>";
+			list += "</a></li>";
+		} else {
+			list += "<li id='" + data.category_id + "'><input type='checkbox'/><label class='node'><a  href='#'>" + data.name + "</a>";
+			list += "<a><i class='fa fa-plus-circle new-category-hidden'></i></a>";
+			list += "</label>";
+
+			list += "<ul>";
+			for (var i = 0; i < data.children.length; i++) {
+				list += createTree(data.children[i]);
+			}
+			list += "</ul>";
+			list += "</li>";
+		}
+		//list += "</ul>";
+		return list;
+	}
+
+	/**
+	 * Validates if all necessary inputs have been entered for creating new stock item.
+	 */
+	function validateStockCreation() {
+		var isValid = true;
+		var itemCost = 0.00;
+		if ($("#item-name").val() == "") {
+			isValid = false;
+			showMessage("Item name is required.", "danger", true);
+		} else if ($("#item-code").val() == "") {
+			isValid = false;
+			showMessage("Item code is required.", "danger", true);
+		} else if ($("div#categories").data("value") == "" || $("div#categories").data("value") == undefined) {
+			isValid = false;
+			showMessage("Select a category for the stock item.", "danger", true);
+		} else if ($("#item-cost").val() == "") {
+			isValid = false;
+			showMessage("Item cost is required.", "danger", true);
+		} else if ($("#item-price").val() == "") {
+			isValid = false;
+			showMessage("Item price is required.", "danger", true);
+	     
+		}  else if ($("#item-tax-rate").val() == "" || $("#item-tax-rate").find(":selected").text().trim() == "Choose Tax Rate" ) {
+			isValid = false;
+			showMessage("Select tax Rate .", "danger", true);
+		}
+		
+		else if ($("#item-discount-rate").val() == "" || $("#item-discount-rate").find(":selected").text().trim() == "Choose Discount Rate" ) {
+			isValid = false;
+			showMessage("Select Discount Rate.", "danger", true);
+		} else if ($("#item-price").val() != "") { 
+			var itemCost = parseFloat($("#item-cost").val());
+			var itemPrice = parseFloat($("#item-price").val());
+			if (itemPrice < itemCost) {
+				isValid = false;
+				showMessage("Item price cannot be less than cost.", "danger", true);
+			}
+		} 
+		else if ($("#item-tax-rate").val() == "-1") {
+			console.log("into here")
+			isValid = false;
+			showMessage("Item tax rate is required.", "danger", true);
+		} else if ($("#item-discount-rate").val() == "-1") {
+			console.log("into here there")
+			isValid = false;
+			showMessage("Item discount rate is required.", "danger", true);
+		}
+
+		if (!isValid) {
+			$("html").scrollTop(0);
+		} else {
+			removeMessage();
+		}
+		return isValid;
+	}
+
+	/**
+	 * Adds a new category as a child of given parent category.
+	 */
+	function addNewCategory(catgName, parentId) {
+		//TODO:
+	//	alert("Category:" + catgName + "  -  parent" + parentId);
+	}
+
+	function getNewItemCode() {
+		$.ajax({
+			url : getRequestUrl(22),
+			dataType : "json",
+			success : function(data) {
+				$("#item-code").val(data[0].item_code);
+			}
+		});
+	}
+
+	/**
+	 * Saves new stock item to database.
+	 */
+	function doSaveStockItem() {
+		//var data = serializeItem();
+		var oldText = $("#save-stock-item").text();
+		$("#save-stock-item").data("old-text", oldText);
+		$("#save-stock-item").text("Saving...");
+		$.ajax({
+			url : getRequestUrl(10),
+			dataType : "json",
+			type : "POSt",
+			data : {
+				data : serializeItem
+			},
+			success : function(data) {
+				if (data.result==0) {
+				alert("successfully saved stock");
+				$("div#categories").removeData("value");
+				getNewItemCode();
+				}else {
+					alert(data.desc);
+					location.reload();
+				}
+			},
+			error : function(xhr, status, text) {
+				alert("Error while saving item: " + status + ":" + text);
+			},
+			complete : function() {
+				$("#save-stock-item").text($("#save-stock-item").data("old-text"));
+			}
+		});
+	}
+
+	function serializeItem() {
+		var o = {};
+		debugger ;
+		o.name = $("#item-name").val();
+		o.code = $("#item-code").val();
+		o.category = $("#categories").data("value");
+		o.units = $("#units-list").val();
+		if (o.units == "-1") {
+			o.units_val = $("#units-list").find(":selected").text();
+		}
+		o.rate = $("#item-price").val();
+		//o.op_bal = $("#item-op-stock").val();
+		o.op_bal = [];
+		var branches = $("#branch-wise-stock tbody tr");
+		for (var i=0; i<branches.length; i++) {
+			var brStock = {};
+			brStock.br_code = $(branches[i]).find("td:first").attr("id");
+			brStock.stock =  $(branches[i]).find("td:last input").val();
+			o.op_bal.push(brStock);
+		}
+		o.cost = $("#item-cost").val();
+		o.discnt_percent = $("#item-discount-rate").val();
+		if (o.discnt_percent == "-1") {
+			o.discnt_percent_val = $("#item-discount-rate").find(":selected").text();
+			alert('value of discount'+$("#item-discount-rate").find(":selected").text());
+		}
+		o.tax_slab = $("#item-tax-rate").val();
+		if (o.tax_slab == "-1") {
+			o.tax_slab_val = $("#item-tax-rate").find(":selected").text();
+		}
+
+		var out = JSON.stringify(o);
+		console.log("new item creation POST data: " + out);
+		return out;
+	}
+
+	function loadTaxSlabs() {
+		var url = getRequestUrl(17);
+		$.ajax({
+			url : url,
+			dataType : "json",
+			success : function(data) {
+				var options = "";
+				//"<option value='' default selected>Select Tax Slab</option>";
+				for (var i = 0; i < data.length; i++) {
+					options += "<option value='" + data[i].id + "'>" + data[i].rate + "</option>";
+				}
+				$("#item-tax-rate").append(options);
+				$("#item-tax-rate").data("data-loaded", true);
+			},
+			error : function(xhr, status, error) {
+				$("#item-tax-rate").siblings("div.inline").remove();
+				$("#item-tax-rate").after(errorP("Unable to retrieve tax slabs."));
+			}
+		});
+
+	}
+
+	function loadDiscountSlabs() {
+		$.ajax({
+			url : getRequestUrl(16),
+			dataType : "json",
+			success : function(data) {
+				var options = "";
+				//"<option value='' default selected>Select Tax Slab</option>";
+				for (var i = 0; i < data.length; i++) {
+					options += "<option value='" + data[i].id + "'>" + data[i].disc + "</option>";
+				}
+				$("#item-discount-rate").append(options);
+				$("#item-discount-rate").data("data-loaded", true);
+			},
+			error : function(xhr, status, error) {
+				$("#item-discount-rate").siblings("div.inline").remove();
+				$("#item-discount-rate").after(errorP("Unable to retrieve discount slabs."));
+			}
+		});
+
+	}
+
+	function loadBranches() {
+		$.ajax({
+			url : getRequestUrl(19),
+			dataType : "json",
+			success : function(data) {
+				var rows = "";
+				for (var i = 0; i < data.length; i++) {
+					rows += "<tr>";
+					rows += "<td id='" + data[i].br_code + "'>" + data[i].address + "</td>";
+					rows += "<td class='td-input'><input type='number' class='custom-sridama' onkeydown='allowNumbers(event)' /></td>";
+					rows += "</tr>";
+				}
+				$("#branch-wise-stock tbody").append(rows);
+			},
+			error : function(xhr, status, error) {
+			}
+		});
+	}
+
+	function addNewItem(element, itemType) {
+
+		var newItem = prompt("Enter new " + itemType);
+		if (itemType == "Unit Type") {
+			if (!isNaN(newItem)) {
+				alert("Only Text is Allowed");
+				return ;
+			}
+		} else {
+			if (isNaN(newItem)) {
+				alert("Only Numbers are Allowed");
+				return;
+			}
+		}
+		if (newItem == null || newItem == undefined || newItem.trim()=="") {
+			return;
+		}
+		var options = element.find("option");
+		for (var i = 0; i < options.length; i++) {
+			if ($(options[i]).text() == newItem) {
+				alert("Duplicate " + itemType + "!");
+				return;
+			}
+		}
+		element.append("<option value='-1'>" + newItem + "</option>");
+		element.val("-1");
+	}
+</script>

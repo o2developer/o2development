@@ -1,0 +1,362 @@
+<div class="cpanel cpanel-info shadow">
+	<div class="cpanel-heading">
+		Stock Transfer
+		<a href="#" class="panel-close"><span class="glyphicon glyphicon-remove titlebar-icon pull-right"></span></a>
+	</div>
+	<div class="cpanel-body">
+		<div class="bottom-border">
+			<div id="dc-num-display">
+				DC No.:
+				<input type="text" readonly class="custom-sridama" id="dc-no" />
+				<label id="date" class="pull-right">Dated:</label>
+			</div>
+			<!-- <div id="date-display" class="pull-right"> -->
+
+			<!-- </div> -->
+		</div>
+
+		<form class="form-inline bottom-border" role="form">
+			<div class="form-group col-md-5">
+				<label class="sr-only" for="exampleInputEmail2">Choose Item</label>
+				<input type="hidden" id="stock-item" style="width:300px"/>
+			</div>
+			<div class="form-group col-md-2">
+				<label class="sr-only" for="stock-qty">Quantity</label>
+				<input type="number" class="form-control input-sm" id="stock-qty" placeholder="Enter Quantity">
+			</div>
+			<button id="add" type="button" class="btn btn-sm btn-default">
+				Add
+			</button>
+		</form>
+		<div class="tbl-head">
+			<table class="table table-bordered table-striped">
+				<thead>
+					<tr>
+						<th width="5%" class='right-align'>#</th>
+						<th width="45%"> Item</th>
+						<th width='10%' class='right-align'>Cost</th>
+						<th width='10%' class='right-align'>MRP</th>
+						<th width="10%" class='right-align'> Quantity</th>
+						<th width='15%' class='right-align'>Amount</th>
+						<th width="5%"> </th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+
+		<div class="tbl-body">
+			<div>
+				<table id="xfer-items" class="table table-bordered table-striped">
+					<tbody class="tbl-container"></tbody>
+				</table>
+			</div>
+		</div>
+		<table id="stock-xfer-footer" class="table table-bordered">
+			<tfoot>
+				<tr>
+					<td width="5%"></td>
+					<td width="45%" class="right-align"> Totals </td>
+					<td width="10%"></td>
+					<td width="10%"></td>
+					<td width="10%" class="right-align" id="total-qty"></td>
+					<td width="15%" class="right-align" id="total-amt"></td>
+					<td width=5%></td>
+				</tr>
+			</tfoot>
+		</table>
+		<div>
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+				<!-- <label for="to-branch"> Select branch to transfer to: </label> -->
+				<select id="to-branch" class="custom-sridama" placeholder="Select target branch">
+					<option value=""></option>
+					<option value="1">Main</option>
+					<option value="2">Domlur Sports Line</option>
+					<option value="3">Ganganagar Sports Line</option>
+					<option value="4">Mahadevapura Sports Line</option>
+				</select>
+			
+				<input type="text" id="e-sugam-no" class="custom-sridama" placeholder="E-Sugam Number" />
+				<input type="text" id="vehicle-no" class="custom-sridama" placeholder="Vechicle Number" />
+	
+				<button id="xfer-save" type="button" class="btn btn-success btn-sm pull-right">
+					Transfer
+				</button>
+				<button id="xfer-cancel" type="button" class="btn btn-default btn-sm pull-right">
+					Cancel
+				</button>
+			</div>
+			<div class="clearfix"></div>
+		</div>
+	</div>
+</div>
+
+<script>
+	$(function() {
+		$("#stock-item").select2({
+			placeholder : "Select an item...",
+			width : "element",
+			query : function(query) {
+				var data = $("#stock-item").data("data");
+				if (data == undefined || data == "") {
+					var json;
+					$.ajax({
+						//url : "responses/item-list-original.json",
+						url : getRequestUrl(3),
+						dataType : "json",
+						async : false,
+						success : function(data) {
+							json = convert2json(data);
+						},
+						error : function(xhr, status, error) {
+							console.log("error while getting item list" , status, error);
+						}
+					});
+					$("#stock-item").data("data", json);
+					query.callback(json);
+
+				} else if (query.term == "") {
+					query.callback(data);
+				} else {
+					var results = getMatching(data, query.term);
+					query.callback(results);
+				}
+			}
+		});
+
+		$("#date").text("Date: " + today());
+
+		$("#dc-no").val(getNextDC());
+
+		$("#stock-item").on("change", function(e) {
+			e.preventDefault();
+			$(this).data("selected", e.added);
+			//console.log(JSON.stringify(e));
+			$("#stock-qty").focus();
+			$("#stock-qty").data("x", "y");
+			console.log("focusing qty done.");
+
+		});
+
+		$("#stock-qty").on("keyup", function(e) {
+			console.log("why me???");
+			if ($(this).data("x") == "y") {
+				$(this).removeData("x");
+				return;
+			}
+			if (e.which == 13) {
+				$("#add").trigger("click");
+			}
+		});
+
+		$("#add").on("click", function() {
+			if ($("#stock-item").val() == "") {
+				showMessage("Choose an item.", "danger", true);
+				return;
+			}
+			if ($("#stock-qty").val() == "") {
+				showMessage("Enter quantity.", "danger", true);
+				return;
+			}
+			addRow($("#stock-item").data("selected"), $("#stock-qty").val());
+			$("#stock-item").select2('data', null);
+			// hope this clears selection :)
+			$("#stock-qty").val("");
+			$("#s2id_autogen1").focus();
+
+		});
+
+		$("#to-branch").select2({
+			width : "element"
+		});
+
+		/**
+		 * Transfer save event handler...
+		 */
+		$("#xfer-save").on("click", function() {
+			if (validateXfer()) {
+				doXfer(prepareXferJson());
+			}
+		});
+
+		/**
+		 * Delete a row, if delete icon clicked.
+		 */
+		$("#xfer-items tbody").delegate("td.delete a", "click", function() {
+			var result = confirm("Do you want to delete this row?");
+			if (result == true) {
+				$(this).parents("tr").remove();
+			}
+		});
+		
+		/**
+		 * the to-branch dropdown should not have the option to select our own brnach. 
+		 */
+		var myBranch =  $.cookie("brCode");
+		$("#to-branch option[value='" + myBranch + "']").remove();
+	});
+
+	function convert2json(data) {
+		for (var i = 0; i < data.length; i++) {
+			data[i].text = data[i].name;
+		}
+		var o = new Object();
+		o.results = data;
+		return o;
+	}
+
+	/**
+	 * Returns a subset of results matching a given search str.
+	 */
+	function getMatching(data, searchStr) {
+		var result = new Object();
+		result.results = [];
+		for (var i = 0; i < data.results.length; i++) {
+			if (data.results[i].text.toLowerCase().indexOf(searchStr.toLowerCase()) == 0) {
+				result.results.push(data.results[i]);
+			}
+		}
+		return result;
+	}
+
+	function addRow(item, qty) {
+		
+		/** 
+		 * first check if the selected item is already added. 
+		 */
+		var rows = $("#xfer-items tbody tr");
+		for (var i=0; i<rows.length; i++) {
+			if (item.id == $(rows[i]).data("data").id) {
+				var result = confirm("This item " + item.name + " already added. Do you want to update quantity instead?");
+				if (result == true) {
+					
+					 var qtyCell = $(rows[i]).find("td.qty");
+					var newQty = parseInt(qty) + parseInt(qtyCell.text());
+					$(rows[i]).find("td.qty").text(newQty);
+					
+					//TODO: scroll to this row and make it visible, if not already in viewport.
+					return;
+				}
+			}
+		}
+		/*
+		 * Find the next slno for the new row.
+		 */
+		var slno = $("#xfer-items tbody tr").length + 1;
+		var newRow = "<tr>";
+		newRow += "<td width='5%' class='right-align'>" + slno + "</td>";
+		newRow += "<td width='45%'>" + item.name + "</td>";
+		newRow += "<td width='10%' class='right-align'>" + parseFloat(item.cost).toFixed(2) + "</td>";
+		newRow += "<td width='10%' class='right-align'>" + parseFloat(item.rate).toFixed(2) + "</td>";
+		newRow += "<td width='10%' class='qty right-align'>" + qty + "</td>";
+		newRow += "<td width='15%' class='amt right-align'>" + (qty * item.cost).toFixed(2) + "</td>";
+		newRow += "<td class='delete' width='5%'><a href='#'><i class='fa fa-trash-o idle'></a>";
+		newRow += "</tr>";
+
+		$("#xfer-items tbody").append(newRow);
+		$("#xfer-items tbody tr:last").data("data", item);
+		
+		updateTotalStock();
+	}
+
+	/**
+	 * Checks if necessary data is filled in for affecting the xfer.
+	 */
+	function validateXfer() {
+		var isValid = true;
+		if ($("table#xfer-items tbody tr").length == 0) {
+			showMessage("Add at least one item for transfer.", "danger", true);
+			$("div.tbl-body").addClass("has-error");
+			isValid = false;
+		}
+		if ($("#to-branch").val() == "") {
+			showMessage("Select a destination branch for transfer.", "danger", true);
+			$("#s2id_to-branch").addClass("has-error");
+			isValid = false;
+		}
+
+		if (isValid) {
+			removeMessage();
+		}
+		return isValid;
+	}
+
+	/**
+	 * Build a json string for the xfer items
+	 */
+	function prepareXferJson() { 
+		 debugger ;
+		var o = new Object();
+		o.dcno = $("#dc-no").val();
+		o.from_branch = $.cookie("brCode");
+		o.to_branch = $("#to-branch").val();
+		o.esugam = $("#e-sugam-no").val();
+		o.vehicle_no = $("#vehicle-no").val();
+		o.amount = $("#total-amt").val();
+		o.items = [];
+		var rows = $("table#xfer-items tbody tr");
+		for (var i = 0; i < rows.length; i++) {
+			var item = new Object();
+			item.id = $(rows[i]).data("data").id;
+			item.qty = $(rows[i]).find("td.qty").text();
+			o.items.push(item);
+		}
+		return o;
+	}
+
+	/**
+	 * Submit the data to backend for stock xfer.
+	 */
+	function doXfer(data) {
+		$("#xfer").text("Transferring...");
+		$.ajax({
+			url : "/eazytrack/EzTrackServlet?opcode=14",
+			dataType : "json",
+			type : "POST",
+			data : {
+				"data" : JSON.stringify(data)
+			},
+			timeout : 60000,
+			success : function(data) {
+				alert("Stock is successfully transferred, subject to approval from receiving branch.");
+				var dc_url = "/eazytrack/tmp/dc_" + $("#dc-no").val() + "_" + $.cookie("brCode") + ".pdf";
+				window.open(dc_url, 'Delivery Challan # ' + $("#dc-no").val(), 'window settings');
+			},
+			error : function(xhr, status, exception) {
+				$("#xfer").text("Transfer");
+				showMessage(status + ": " + xhr.status + " " + exception);
+			}
+		});
+	}
+
+	function getNextDC() {
+		$.ajax({
+			//url: "/eazytrack/EzTrackServlet?opcode=13",
+			//url : "responses/dcno.json",
+			url : getRequestUrl(13),
+			dataType : "json",
+			timeout : 60000,
+			success : function(data) {
+				$("#dc-no").val(data[0].dc_no);
+			},
+			error : function(xhr, status, exception) {
+				$("#dc-no").after("<p class='inline error'> Unable to retrieve DC number. </p>");
+			}
+		});
+	}
+	
+	/**
+	 * Updates the total's row at the bottom of stock table. 
+	 */
+	function updateTotalStock() {
+		var rows = $("table#xfer-items tbody tr");
+		var totalQty = 0;
+		var totalAmt = 0;
+		for (var i=0; i<rows.length; i++) {
+			totalQty += parseInt($(rows[i]).find("td.qty").text());
+			totalAmt +=  parseFloat($(rows[i]).find("td.amt").text());
+		}
+		
+		$("td#total-qty").text(totalQty);
+		$("td#total-amt").text(totalAmt.toFixed(2));
+	}
+</script>

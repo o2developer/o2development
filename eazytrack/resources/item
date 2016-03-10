@@ -1,0 +1,31 @@
+{
+  "id": "45",
+  "name": "SR ASH VTC INDIA",
+  "code": "1012",
+  "category": 804,
+  "units": "1",
+  "rate": "6000",
+  "op_bal": [
+    {
+      "br_code": "1",
+      "stock": "53"
+    },
+    {
+      "br_code": "2",
+      "stock": "43"
+    },
+    {
+      "br_code": "3",
+      "stock": "47"
+    },
+    {
+      "br_code": "4",
+      "stock": "52"
+    }
+  ],
+  "cost": "2760",
+  "discnt_percent": "1",
+  "tax_slab": "1"
+}
+
+

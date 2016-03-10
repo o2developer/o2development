@@ -1,0 +1,29 @@
+{
+  "details": [
+    {
+      "balance": 301,
+      "desc": "Item has been transfered to branch ",
+      "reduction": 4,
+      "sl_no": 1,
+      "addition": 0,
+      "date": "2014-01-04 17:43:05.0"
+    },
+    {
+      "balance": 305,
+      "desc": "Item has been transfered to branch ",
+      "reduction": 4,
+      "sl_no": 2,
+      "addition": 0,
+      "date": "2014-01-04 18:01:33.0"
+    },
+    {
+      "balance": 309,
+      "desc": "Item has been transfered to branch ",
+      "reduction": 4,
+      "sl_no": 3,
+      "addition": 0,
+      "date": "2014-01-16 21:44:41.0"
+    }
+  ],
+  "op_bal": 309
+}

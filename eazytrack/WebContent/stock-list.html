@@ -1,0 +1,284 @@
+<div id="stock-list" class="cpanel shadow cpanel-info">
+	<div class="cpanel-heading">
+		Stock Listing...
+		<a href="#" class="panel-close"><span class="glyphicon glyphicon-remove titlebar-icon pull-right"></span></a>
+		<a id="stock-list-settings" href="#"><i class="fa fa-cog pull-right titlebar-icon"></i></a>
+	</div>
+	<div>
+		<table id="stock-list-table" class="table table-bordered">
+			<thead>
+				<tr>
+					<th width="20%">Category</th>
+					<th>Code</th>
+					<th width="35%">Item Particulars</th>
+					<th>tax</th>
+					<th>Quantity</th>
+					<th> Unit </th>
+					<th width="10%">Rate</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td colspan="7" style="text-align: center"><img src="resources/ajax-loader.gif" /> Loading... </td>
+				</tr>
+			</tbody>
+			<tfoot>
+			<tr>
+	              <td colspan="3"> </td>
+	              <td> Totals</td>
+	              <td id="qty_total">4018 </td>
+	              <td> </td>
+	              <td id="amount_totals"> </td>
+			  <td>             
+			</tfoot>
+		</table>
+	</div>
+</div>
+
+<script>
+	$(function() {
+		var rowIndex = 0;
+		$("#stock-list-table").dataTable({
+			//"sAjaxSource" : "/eazytrack/EzTrackServlet?opcode=3&data={}",
+			"bProcessing": true,
+			"bServerSide": true,
+			"bFilter" : true,
+			"sSearch" : true,
+			"sAjaxSource" : getRequestUrl(42),
+			"fnServerData" : function( sSource, aoData, fnCallback, oSettings ) {
+				oSettings.jqXHR = $.ajax({
+					"dataType" : "json",
+					"url" : sSource,
+					"data" : aoData,
+					"success" : function(data) {
+						//do your stuff here
+						//var o = new Object();
+						//o.aaData = data.aaData;
+						//finally call the original fn.
+						$("#stock-list-table tfoot tr td#amount_totals").text(data.columtot.toFixed(2));
+						fnCallback(data);
+					}
+				});
+			},
+		//	"sDom" : "t<'row'<'col-xs-6'i><'col-xs-6'p>><'row'<'col-xs-12'>>",
+			"aoColumns" : [ {
+				"mData" : "category"
+			}, {
+				"mData" : "code"
+			}, {
+				"mData" : "name"
+			} 
+			, {
+				"mData" : "taxes"
+			}, {
+				"mData" : "qty",
+				"sClass" : "right-align"
+			},{
+				"mData" : "units",
+				"sClass" : "center-align"
+			},
+			{
+				"mData" : "rate",
+				"sClass" : "right-align"
+			}, null],
+			"aoColumnDefs" : [{
+				"aTargets" : [0],
+				"mData" : function(source, type, val) {
+					if (type == "set") {
+						source.slno = ++rowIndex;
+						return source.slno;
+					} else if (type == "display" || type == "filter" || type == "sort") {
+						return source.slno;
+					} else if (type == undefined || type == "type")
+						return 0;
+					//return source.slno;
+				}
+			}, {
+				"aTargets" : [3],
+				"bSearchable" : false,
+				"mRender" : function( data , type, full ) {
+					return  data +"%" ;    // + data.toFixed(2)
+				}
+			} ,
+			
+			{
+				"aTargets" : [4],
+				"bSearchable" : false,
+				"mRender" : function( data , type, full ) {
+					return  data  ;    // + data.toFixed(2)
+				}
+			},
+			
+			{
+				"aTargets" : [5],
+				"bSearchable" : false,
+				"mRender" : function( data , type, full ) {
+					return data ;
+				}
+			}, {
+				"aTargets" : [6],
+				"bSearchable" : false,
+				"mRender" : function(data, type, full) {
+					return "<i class='fa fa-inr'></> "+data ;    // + data.toFixed(2)
+				}
+			}, {
+				"aTargets" : [7],
+				"bSearchable" : false,
+				"mData" : function( source, type, val ) {
+					var colData = "<a href='#' class='action-history'><i class='fa fa-clock-o' title='Stock Item History'></i> </a> ";
+					colData += "<a href='#' class='action-edit'><i class='fa fa-edit' title='Edit Properties'></i></a>";
+					colData += "<a href='#' class='action-edit'><i class='fa fa-barcode' title='Print Barcode'></i></a>";
+					return colData;
+				}
+			}],
+			"fnCreatedRow" : function(nRow, aData, iDataIndex) {
+				invoiceEdit($("td:last a.action-edit", nRow), aData);
+				bindQTip($("td:last a.action-history", nRow), aData);
+			}
+		
+		});  // End of Datatable
+
+	});    // End of ready function
+
+	/**
+	 * Binds a popover tooltip to show the data (history) for a stock item.
+	 */
+	function bindQTip(element, rowData) {
+		var data = {} ;
+		data.item_id = rowData.id;
+		$(element).qtip({
+			content : {
+				text : "<img src='resources/ajax-loader.gif'> loading...",
+				title : "Stock Item History for " + rowData.name,
+				ajax : {
+					url : getRequestUrl(31),
+					type : "POST",
+					dataType : "json",
+					data : { "data" :  JSON.stringify(data)} ,
+					success : function(content) {
+						var $this = this;
+						setTimeout(function() {
+							// Set the tooltip content upon successful retrieval
+							var chart = formatStockHistory2Chart(content);
+							var chartElement = $this.tooltip.find(".qtip-content");
+							chartElement.css({
+								"height" : "300px",
+							});
+							chart.write(chartElement.attr("id"));
+						}, 1000);
+					},
+					error : function(xhr, status, error) {
+						// Upon failure... set the tooltip content to the status and error value
+						this.set('content.text', status + ': ' + error);
+					}
+				},
+				button : true
+			},
+			style : {
+				width : "500px",
+				//classes: "q2tip qtip-shadow"
+				classes : "qtip-bootstrap qtip-shadow"
+			},
+			position : {
+				my : "right center",
+				at : "bottom left",
+				target : $(element)
+			},
+			show : "click",
+			hide : "unfocus"
+
+		});
+	}
+
+	/**
+	 * Formats the stock item history as a html table.
+	 */
+	function formatStockHistory(data) {
+		var html = "<table class='table table-bordered'>";
+
+		// table header
+		html += "<thead><tr>";
+		html += "<th>Date</th>";
+		html += "<th>Transaction Details</th>";
+		html += "<th>Incoming</th>";
+		html += "<th>Outgoing</th>";
+		html += "<th>Balance</th>";
+
+		// table body rows
+		html += "<tbody>";
+		// first row is always opening balance.
+		html += "<tr>";
+		html += "<td>" + data.details[0].date + "</td>";
+		html += "<td> Opening Balance</td>";
+		html += "<td> </td><td></td>";
+		html += "<td>" + data.op_bal + "</td></tr>";
+
+		for (var i = 0; i < data.details.length; i++) {
+			html += "<tr>";
+			html += "<td>" + data.details[i].date + "</td>";
+			html += "<td>" + data.details[i].desc + "</td>";
+			html += "<td>" + ((data.details[i].addition == 0) ? "" : data.details[i].addition) + "</td>";
+			html += "<td>" + ((data.details[i].reduction == 0) ? "" : data.details[i].reduction) + "</td>";
+			html += "<td>" + data.details[i].balance + "</td>";
+			html += "</tr>";
+		}
+		html += "</tbody>";
+		html += "</table>";
+
+		return html ;
+	}
+
+	function formatStockHistory2Chart(data) { 
+		var chart = new AmCharts.AmSerialChart();
+		chart.dataProvider = data.details;
+		chart.categoryField = "date";
+		chart.angle = 30;
+		chart.depth3D = 10;
+
+		var graph = new AmCharts.AmGraph();
+		graph.valueField = "balance";
+		graph.type = "line";
+		graph.fillAlphas = 0; //0.8;
+		graph.bullet = "round";
+		graph.balloonText = "Dt: [[category]]:<br> Stock:<b>[[balance]]</b>";
+
+		chart.addGraph(graph);
+
+		var categoryAxis = chart.categoryAxis;
+		categoryAxis.autoGridCount = false;
+		categoryAxis.gridCount = data.details.length;
+		categoryAxis.gridPosition = "start";
+		categoryAxis.labelRotation = 90;
+		//categoryAxis.parseDates = true;
+		//categoryAxis.minPeriod = "DD";
+		return chart;
+	}
+	
+	/* {"last_modified_date":"2014-01-20","category":806,"
+	last_modified_by":"admin","rate":300.0,"discnt_percent":4.0,"name":"SOME OTHER NAME12",
+	"op_bal1":{"stock":100,"op_bal":0,"branchcode":2},"code":7013,"modal":null,"tax_slab":1.0,"cost":200.0,"units":"1"} */
+function invoiceEdit(element, rowData) {
+	//TODO have to give the full edit options where invoice can be edited
+	var nTr = $(this).parents('tr')[0];
+    // var aData = oTable.fnGetData(nTr);
+    var aData =  rowData ;
+	var obj = new Object();
+	//debugger;
+	obj.item_id = aData.id;  
+	$(element).on("click" , function() {
+	alert (' Item which is edited '+aData.id);
+	//obj.txn_type = 'sale';        // to specify invoice is off sales type
+
+	if ($('#to-branch').val() !== null && $('#to-branch').val() !== "") {
+		obj.branch = $('#to-branch').val();
+	} else {
+		obj.branch = $.cookie("brCode");
+	}
+	$.cookie("obj", JSON.stringify(obj));
+	$.cookie("action", 'update');
+	$("#canvas").load("new-stock-item1.html");
+	});   /// End of onclick function for the element
+}
+
+</script>

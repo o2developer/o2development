@@ -1,0 +1,52 @@
+<div id="home" class="cpanel cpanel-info shadow">
+	<div class="cpanel-heading">
+		<!-- <i class="fa fa-home fa-lg"></i> Home -->
+		<span class="glyphicon glyphicon-home"> </span> Home
+
+	</div>
+	<div class="cpanel-body">
+		<div class="banner col-sm-6 col-md-6 col-lg-6">
+			<div class="col-sm-3">
+				<img src="resources/stock-report.png" />
+			</div>
+			<div class="banner-content col-sm-8">
+			<h5> Stock Reports</h5>
+			Easily manage your stock items comprehensively.  Stock maintenance, tracking has never been easier before. 
+			Single point of administracking for all stock tracking needs. 
+			</div>
+		</div>
+		<div class="banner col-sm-6 col-md-6 col-lg-6">
+			<div class="col-sm-3"><img src="resources/sale.png" /></div>
+			<div class="banner-content col-sm-8">
+			<h5> Sales </h5>
+			Make item sales by choosing from a list of stock items.  Easily generate / print invoices. 
+			</div>
+		</div>
+		<div class="banner col-sm-6 col-md-6 col-lg-6">
+			<div class="col-sm-3"><a href="#" id="inward-stock"><img src="resources/notification.png" /></a></div>
+			<div class="banner-content col-sm-8">
+			<a href="#" id="inward-stock"><h5>Stock Transfer Notifications</h5></a>
+			 You have incoming stock.  Click here to see the details.
+			</div>
+		</div>
+		<div class="banner col-sm-6 col-md-6 col-lg-6">
+			<div class="col-sm-3"><img src="resources/stock.png" /></div>
+			<div class="banner-content col-sm-8">
+			<h5> Stock Management</h5>
+			Easily manage your stock items comprehensively.  Stock maintenance, tracking has never been easier before. 
+			Single point of administracking for all stock tracking needs. 
+			</div>
+		</div>
+		<div class="clearfix"></div>
+	</div>
+	
+</div>
+
+<script>
+	$(function() {
+		$(".banner a").on("click", function() {
+			var url = $(this).attr("id") + ".html";
+			$("#canvas").load(url);
+		});
+	});
+</script>

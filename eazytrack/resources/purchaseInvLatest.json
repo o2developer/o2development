@@ -1,0 +1,33 @@
+{
+  "invoice": {
+    "invoice_no": "25",
+    "pur_inv_no": "9901",
+    "invoice_date": "2014-2-10",
+    "inter_state": "y",
+    "cform": "y",
+    "sub_total": "523.04",
+    "additional": "0.00",
+    "round_off_disc": "0.00",
+    "final_total": "582.00",
+    "pur_inv_date": "2014-2-3",
+    "goods_received_date": "2014-2-7",
+    "action": "update"
+  },
+  "customer": {
+    "cust_id": 106,
+    "name": "DEVAOUTT PATRE",
+    "phone": ""
+  },
+  "items": [
+    {
+      "item_id": 172,
+      "qty": "1",
+      "rate": 550,
+      "discount": "16.50",
+      "amount": "523.04",
+      "dsc_p": 3,
+      "vat_p": 5.5,
+      "category": 823
+    }
+  ]
+}

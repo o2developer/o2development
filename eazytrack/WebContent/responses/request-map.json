@@ -1,0 +1,160 @@
+[
+  {
+    "req_code": -1,
+    "local_url": "responses/success.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=-1&data={}"
+  },
+  {
+    "req_code": 1,
+    "local_url": "responses/sale-txns.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=1"
+  },
+  {
+    "req_code": 2,
+    "local_url": "responses/customer-list.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=2&type_ahead=%QUERY"
+  },
+	  {
+	"req_code": 3,
+	"local_url": "responses/item-list-original.json",
+	"server_url": "/eazytrack/EzTrackServlet?opcode=3&type_ahead=%QUERY&data={}"
+	},
+
+ {
+    "req_code": 10,
+    "local_url": "responses/success.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=10"
+  }, {
+    "req_code": 11,
+    "local_url": "responses/success.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=11"
+  }
+  ,{
+    "req_code": 13,
+    "local_url": "responses/success.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=13&data={}"
+  }, {
+    "req_code": 15,
+    "local_url": "responses/stock-xfer-alerts.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=15&data={}"
+  },  
+  {
+    "req_code": 17,
+    "local_url": "responses/tax-slabs.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=17"
+  },
+  {
+    "req_code": 16,
+    "local_url": "responses/discount-slabs.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=16"
+  },
+  {
+    "req_code": 19,
+    "local_url": "responses/branches.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=19"
+  },
+  {
+    "req_code": 18,
+    "local_url": "responses/stock-accept-reject-result.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=18"
+  },
+  {
+    "req_code": 20,
+    "local_url": "responses/categories_new.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=20"
+  },
+  {
+    "req_code": 22,
+    "local_url": "responses/new-item-code.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=22"
+  },
+  {
+    "req_code": 23,
+    "local_url": "responses/success.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=23"
+  },
+  {
+    "req_code": 24,
+    "local_url": "responses/units.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=24"
+  },
+    {
+    "req_code": 28,
+    "local_url": "responses/invlist.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=28&data={}"
+  },
+    {
+    "req_code": 29,
+    "local_url": "responses/invlist.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=29"
+  } ,
+  {
+    "req_code": 30,
+    "local_url": "responses/sale-edit.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=30"
+  } ,
+    {
+    "req_code": 31,
+    "local_url": "responses/stock-item-history.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=31"
+  } , {
+    "req_code": 32,
+    "local_url": "responses/stock-trans-report.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=32"
+  }, {
+    "req_code": 33,
+    "local_url": "responses/stock-trans-item-dtls.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=33"
+  }, {
+    "req_code": 34,
+    "local_url": "responses/sale-export-xl.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=34"
+  } , {
+    "req_code": 35,
+    "local_url": "responses/user-list.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=35"
+  } , {
+    "req_code": 36,
+    "local_url": "responses/user-list.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=36"
+  } , {
+    "req_code": 37,
+    "local_url": "responses/user-list.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=37"
+  },
+   {
+    "req_code": 38,
+    "local_url": "responses/user-list.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=38"
+  },
+   {
+    "req_code": 39,
+    "local_url": "responses/user-list.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=39"
+  },
+   {
+    "req_code": 40,
+    "local_url": "responses/user-list.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=40"
+  },
+   {
+    "req_code": 41,
+    "local_url": "responses/user-list.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=41"
+  },
+  {
+    "req_code": 42,
+    "local_url": "responses/user-list.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=42&data={}"
+  },
+  {
+    "req_code": 45,
+    "local_url": "responses/user-list.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=45&data={}"
+  },
+  {
+    "req_code": 46,
+    "local_url": "responses/user-list.json",
+    "server_url": "/eazytrack/EzTrackServlet?opcode=46&data={}"
+  }
+]

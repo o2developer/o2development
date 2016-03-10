@@ -1,0 +1,43 @@
+{
+    "invoice": {
+    "invoice_no": "15",
+    "invoice_date": "2014-01-01",
+    "inter_state": "y",
+    "cform": "n",
+    "sub_total": "9904.76",
+    "additional": "50.00",
+    "round_off_disc": "8.00",
+    "final_total": "9870.00"
+    
+    "pur_inv_no" : "7914",
+    "pur_inv_date" : "2014-01-09",
+    "goods_received_date" : "2014-01-11"  
+  },
+   "customer": {
+    "cust_id": 50,
+    "name": "ASHOK TRADING AND CO",
+    "phone": ""
+  },
+  "items": [
+    {
+      "item_id": "94",
+      "qty": "2",
+      "rate": 1600,
+      "discount": "176.00",
+      "amount": "3047.62",
+      "dsc_p": 5.5,
+      "vat_p": "5",
+      "category": "1"
+    },
+    {
+      "item_id": "91",
+      "qty": "3",
+      "rate": 2400,
+      "discount": "396.00",
+      "amount": "6857.14",
+      "dsc_p": 5.5,
+      "vat_p": "5",
+      "category": "1"
+    }
+  ]
+}

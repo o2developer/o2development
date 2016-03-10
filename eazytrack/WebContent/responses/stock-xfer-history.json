@@ -1,0 +1,22 @@
+{
+    "aaData" : [
+        {
+            "date" : "01-Jan-2014",
+            "dcno" : "1001",
+            "desc" : "Items got from Domlur Branch",
+            "xfer_type" : "i",
+            "branch" : "3",
+            "amount" : "45625.00",
+            "status" : "C"
+        },
+        {
+            "date" : "03-Jan-2014",
+            "dcno" : "1003",
+            "desc" : "Tranfsered to Mahadevapura Branch",
+            "to_branch" : "2",
+            "amount" : "5200.00",
+            "status" : "P"
+        }
+    ]    
+    
+}

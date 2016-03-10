@@ -1,0 +1,182 @@
+<div id="new_client" class="cpanel cpanel-info shadow">
+	<div class="cpanel-heading">
+		Customer Creation 
+		<a href="#" class="panel-close"><span class="glyphicon glyphicon-remove titlebar-icon pull-right"></span></a>
+	</div>
+	<div class="cpanel-body" >
+		<form id="user-creation-form" class="form-horizontal" role="form">
+			<div class="form-group">
+				<label for="cust_id" class="col-sm-5 control-label">Cust Id</label>
+				<div class="col-sm-5">
+					<input type="text" class="form-control" id="cust_id" maxlength="5" placeholder="Enter Customer ID">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="cust name" class="col-sm-5 control-label">Customer Name</label>
+				<div class="col-sm-5">
+					<input type="text" class="form-control" id="cust_name" maxlength="50" placeholder="Enter customer name">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="address" class="col-sm-5 control-label">Address</label>
+				<div class="col-sm-5">
+					<input type="text" class="form-control" id="address" maxlength="100" placeholder="Enter address">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="phone" class="col-sm-5 control-label">Phone No</label>
+				<div class="col-sm-5">
+					<input type="number" class="form-control" id="phone_no1" onkeydown="allowNumbers(event)" maxlength="10" placeholder="Enter Phone no">
+				</div>
+			</div>
+			
+			<div class="form-group">
+				<label for="phone" class="col-sm-5 control-label">Phone No</label>
+				<div class="col-sm-5">
+					<input type="number" class="form-control" id="phone_no2" onkeydown="allowNumbers(event)" maxlength="10" placeholder="Enter phone no">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="email" class="col-sm-5 control-label">Email </label>
+				<div class="col-sm-5">
+					<input type="text" class="form-control" id="email" maxlength="50" placeholder="Enter email Id">
+				</div>
+			</div>
+			
+			<div class="form-group">
+				<label for="cust_type" class="col-sm-5 control-label">Customer type</label>
+				<div class="col-sm-5">
+					<input type="text" class="form-control" id="cust_type" maxlength="10" placeholder="Enter customer type">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="tin" class="col-sm-5 control-label">TIN NO</label>
+				<div class="col-sm-5">
+					<input type="number" class="form-control" id="tinno" onkeydown="allowNumbers(event)" maxlength="11" placeholder="Enter tin no">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="CST_no" class="col-sm-5 control-label">CST No</label>
+				<div class="col-sm-5">
+					<input type="number" class="form-control" id="cst_no" onkeydown="allowNumbers(event)" maxlength="16" placeholder="Enter cst no">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="state" class="col-sm-5 control-label">State</label>
+				<div class="col-sm-5">
+					<input type="text" class="form-control" id="state" maxlength="15" placeholder="Enter State no">
+				</div>
+			</div>
+			
+		</form>
+		<hr>
+		<button type="button" id="save-user" class="btn btn-success btn-sm pull-right">
+			Save
+		</button>
+		<button type="button" id="cancel" class="btn btn-default btn-sm pull-right">
+			Cancel
+		</button>
+		<div class="clearfix"></div>
+	</div>
+</div>
+
+<script>
+	$(function() {
+		$("#save-user").on("click", function() {
+			if (validateuserCreation()) {
+				doSaveUser();
+			}
+		});
+	});
+	function validateuserCreation() {
+		
+		var isValid = true;
+		if ($("#cust_id").val() == "") {
+			isValid = false;
+			showMessage("cust id is required.", "danger", true);
+		} else if ($("#cust_name").val() == "") {
+			isValid = false;
+			showMessage("customer name is required.", "danger", true);
+		} else if ($("#address").val() == "") {
+			isValid = false;
+			showMessage("address is required.", "danger", true);
+		} else if ($("#phone1").val() == "") {
+			isValid = false;
+			showMessage("phone no is required.", "danger", true);
+		} else if ($("#phone2").val() == "") {
+			isValid = false;
+			showMessage("Phone2 is required.", "danger", false);
+		} else if ($("#email").val() == "") {
+			isValid = false;
+			showMessage("email is required.", "danger", true);
+		} else if ($("#tinno").val() == "") {
+			isValid = false;
+			showMessage("TIN no is required.", "danger", true);
+		} else if ($("#cust_type").val() == "") {
+			isValid = false;
+			showMessage("Customer type is required.", "danger", true);
+		} else if ($("#cst_no").val() == "") {
+			isValid = false;
+			showMessage("CST no is required.", "danger", true);
+		} else if ($("#state").val() == "") {
+			isValid = false;
+			showMessage("user Branch_id is required.", "danger", true);
+		}
+		 
+		if (!isValid) {
+			$("html").scrollTop(0);
+		} else {
+			removeMessage();
+		}
+		return isValid;
+	}
+
+	function doSaveUser() {
+		var data = serializeItem();
+		var oldText = $("#save-user").text();
+		$("#save-user").data("old-text", oldText);
+		$("#save-user").text("Saving...");
+		$.ajax({
+			url : getRequestUrl(10),
+			dataType : "json",
+			type : "POSt",
+			data : {
+				data : serializeItem
+			},
+			success : function(data) {
+				if (data.result==0) {
+				alert("successfully saved stock");
+				$("#user-creation-form")[0].reset();
+				}else {
+					alert(data.desc);
+				}
+			},
+			error : function(xhr, status, text) {
+				alert("Error while saving item: " + status + ":" + text);
+			},
+			complete : function() {
+				$("#save-user").text($("#save-user").data("old-text"));
+			}
+		});
+	}
+
+	function serializeItem() {
+		var o = {};
+		o.cust_id = $('#cust_id').val();
+		o.name = $("#cust_name").val();
+		o.address = $("#address").val();
+		o.phone1 = $("#phone1").data("value");
+		o.phone2 = $("#phone2").data("value");
+		o.email = $('#email').data('value');
+		o.cust_type = $('#cust_type').data('value');
+		o.tin = $('#tinno').data('value');
+		o.cst = $('#cst_no').data('value');
+		o.state = $('#state').data('value');
+		var out = JSON.stringify(o);
+		console.log("new item creation POST data: " + out);
+		return out;
+	}
+
+</script>
+</html>

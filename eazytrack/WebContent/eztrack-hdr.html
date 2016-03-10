@@ -1,0 +1,76 @@
+<div class="product-hdr">
+	<img class="img-logo" src="resources/sridama_new_logo.png" height="60"/>
+	<div class="product-title">
+		ezTRACK - Inventory Management System <span class="version-info">version 1.0.0</span>
+	</div>
+</div>
+<!-- <div id="login-div" class="product-hdr pull-right">Logged in as: <span></span></div> -->
+
+<div class="btn-group pull-right product-hdr" id="login-div">
+	<!-- <div class="btn-group"> -->
+	<a class="btn dropdown-toggle btn-primary" data-toggle="dropdown" id="login-name" href="#" style="color: white" >
+		<i class="fa fa-user fa-fw"></i> 
+		<p class="inline">Ravindranath M</p> 
+		<span class="fa fa-caret-down"></span>
+	</a>
+	<!-- <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"> <span class="fa fa-caret-down"></span></a> -->
+	<ul class="dropdown-menu">
+		<li>
+			<a href="#"><i class="fa fa-pencil fa-fw"></i> Change Password </a>
+		</li>
+		<li class="divider"></li>
+		<li>
+			<a href="#" id="signout"><i class="fa fa-sign-out"></i> Signout</a>
+		</li>
+	</ul>
+	<!-- </div> -->
+</div>
+
+<script>
+	$(function() {
+		var name = $.cookie("name");
+		var branch = parseInt($.cookie("brCode"));
+		// $("#login-div span").text(name + "@" + getBranchName(branch));
+		$("#login-div #login-name p").text(name + "@" + getBranchName(branch));
+	
+		$("#signout").on("click", function(e) {
+			e.preventDefault();
+			$.ajax({
+				url: getRequestUrl(-1),
+				dataType : "json",
+				success: function(data) {
+					if (data.result ==0) {
+						
+						window.location.replace("/eazytrack/login.html");
+					}
+				},
+				error : function(xhr, status, error) { 
+					alert ("Unable to perform clean logout!" + status + ":" + error);
+					window.location.replace("/eazytrack/login.html"); 
+				}
+			});
+		});	
+	
+	});
+
+	/**
+	 * Returns the name of the branch, given its code
+	 * @param {Object} brCode
+	 */
+	function getBranchName(brCode) {
+		switch (brCode) {
+			case 1:
+				return "Main";
+			case 2:
+				return "Domlur";
+			case 3:
+				return "Ganganagar";
+			case 4:
+				return "Mahadevapura";
+			default:
+				return "unknown";
+		}
+	}
+		
+	
+</script>

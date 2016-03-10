@@ -1,0 +1,17 @@
+{
+ "name":"SOME OTHER NAME22",
+ "code":"7013",
+ "category":"806",
+ "units":"1",
+ "rate":"300.00",
+ "op_bal":
+    [
+      {"br_code":"1","stock":"0"},
+      {"br_code":"2","stock":"0"},
+      {"br_code":"3","stock":"0"},
+      {"br_code":"4","stock":"0"}
+    ],
+  "cost":"200.00",
+  "discnt_percent":"4",
+  "tax_slab":"1"
+  }

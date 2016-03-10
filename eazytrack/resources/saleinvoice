@@ -1,0 +1,38 @@
+{ 
+ "invoice":{
+		   "invoice_no":"6",
+           "invoice_date":"2013-12-31",
+           "inter_state":"n",
+           "cform":"n",
+           "sub_total":"80.00",
+           "additional":20.00,
+           "round_off_disc": 2.3,
+           "final_total":"80.00",
+           "payment_mode":"0"
+           },
+           
+   "customer":{"cust_id":591,
+                "name":"RIYAZ",
+                "phone":"Ph-9895521951-9562593313"
+              },
+                
+   "items": [
+             { "item_id": 150,
+               "qty":"1",
+               "rate":100,
+               "discount": 20.00,
+               "amount":80.00,
+               "dsc_p":20,
+               "vat_p": 5.5,
+               "category": 2
+               },
+               { "item_id": 476,
+                "qty":"1",
+                "rate":799.00,
+                "discount":0.00,
+                "amount": 835.00,
+                "dsc_p":20,"vat_p": 14.5,
+                "category": 803
+                }
+             ]
+   }

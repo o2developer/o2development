@@ -1,0 +1,31 @@
+[
+  {
+    "id": "150",
+    "category": "NA",
+    "rate": 750,
+    "discnt_percent": 15,
+    "name": "GERSY",
+    "vat": "5.5",
+    "qty": "95",
+    "code": "3505",
+    "catid": "803",
+    "modal": "",
+    "taxes": "5",
+    "units": "NOS"
+  },
+  {
+    "id": "476",
+    "category": "NA",
+    "rate": 799,
+    "discnt_percent": 20,
+    "name": "TRACK SUIT",
+    "vat": "5.5",
+    "qty": "97",
+    "code": "1288",
+    "catid": "803",
+    "modal": "",
+    "taxes": "0",
+    "units": "NOS"
+  }
+
+]

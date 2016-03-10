@@ -1,0 +1,148 @@
+<div id="stock-inward" class="cpanel cpanel-info shadow">
+	<div class="cpanel-heading">
+		Stock Incoming Notifications
+		<a href='#' class="panel-close"><span class="glyphicon glyphicon-remove pull-right"></span></a>
+	</div>
+	<div class="cpanel-body">
+		
+	</div>
+	
+</div>
+
+<script>
+	$(function() { 
+		loadInboundStock();
+		
+		$("#stock-inward").delegate(".stock-inward-panel a", "click", function() {
+			$(this).parent().siblings(".cpanel-body").slideToggle("fast");
+			$(this).find("i").toggleClass("fa-plus-square fa-minus-square");
+		});
+		
+		$("#stock-inward").delegate("button.accept, button.reject", "click", function() {
+			doAcceptOrReject($(this));
+		});
+	});
+
+	function loadInboundStock() {
+		
+		$.ajax({
+			//url : "responses/stock-xfer-alerts.json",
+			url: getRequestUrl(15),
+			dataType : "json",
+			success : function(data) { 
+
+				for (var i = 0; i < data.length; i++) {
+					var panel;
+					/** create an inner panel for each stock notification DC **/
+					if (i==0) {
+						panel = $(getPanelTemplate());
+					} else {
+						panel  =$(getPanelTemplate(false));
+					}
+					panel.addClass("stock-inward-panel");
+					//panel.find(".cpanel-heading p").text("Delivery Challan# " + data[i].dc_no);
+					var title = "<p class='inline'>Sender Branch: " + getBranchName(parseInt(data[i].from_branch)) + "</p>";
+					title +=  "<p class='inline pull-right'>DC#: " + data[i].dc_no + "</p>";
+					panel.find(".cpanel-heading").append(title);
+					panel.find(".cpanel-body").append(getStockInwardTable());
+					panel.find(".cpanel-body").append(getButtonPanel());
+					
+					// child rows for items in each DC.
+					for (var j = 0; j < data[i].items.length; j++) {
+						var childRow = "<tr>";
+						childRow += "<td>" + (j+1) + "</td>";
+						childRow += "<td>" + data[i].items[j].code + "</td>";
+						childRow += "<td>" + data[i].items[j].desc + "</td>";
+						childRow += "<td>" + data[i].items[j].qty + "</td>";
+						childRow += "<td>" + data[i].items[j].qty + "</td>";
+						//$("#stock-inward tbody").append(childRow);
+						panel.find("table.stock-inward tbody").append(childRow);
+						
+						$("div#stock-inward").append(panel);
+					}
+
+					// store the json data to this panel.
+					//panel.attr("id", data[i].dc_no);
+					panel.find("button.accept").data("dc", data[i].dc_no);
+					panel.find("button.reject").data("dc", data[i].dc_no);
+					panel.data("data", data[i]);
+				}
+			},
+			error : function(xhr, status, error) {
+				console.log("error: ", xhr, status, error);
+			}
+		});
+	}
+	
+	/**
+	 * Adds a stock inward display table with headings and empty body. 
+	 */
+	function getStockInwardTable(panel) {
+		var table = "<table class='table table-bordered stock-inward'>";
+		table += "<thead>";
+		table += "<tr>";
+		table += "<th width='5%'>#</th>";
+		table += "<th width='20%'>Item Code</th>";
+		table += "<th width='55%'>Item Description</th>";
+		table += "<th width='10%'>Sent Qty</th>";
+		table += "<th width='10%'>Recvd Qty</th>";
+		table += "</tr>";
+		table += "</thead>";
+		table += "<tbody></tbody>";
+		
+		return table;
+	}
+	
+	/**
+	 * Returns a button panel div with 3 buttons viz., accept, reject, cancel. 
+	 */
+	function getButtonPanel() {
+		var div = "<div class='button-panel'>";
+		div += "<button class='btn btn-sm btn-success pull-right accept' type='button' > Accept </button>";
+		div += "<button class='btn btn-sm btn-warning pull-right reject' type='button'> Reject </button>";
+		// div += "<button class='btn btn-sm btn-default pull-right' type='button'> Cancel </button>";
+		div += "<div class='clearfix'></div>";
+		div += "</div>";
+		
+		return div;
+	}
+
+	/**
+	 * Sends an "accept" request to web server. 
+	 */
+	function doAcceptOrReject(btn){
+		
+		btn.data("old-text", btn.text());
+		btn.text("Processing...");
+		/* build the data to be POSTed */
+		var panel = btn.parents(".stock-inward-panel");
+		var o = new Object();
+		o.txn_number = panel.data("data").txn_number;
+		o.dc_no = panel.data("data").dc_no;
+		o.from_branch = panel.data("data").from_branch;
+		o.operation = btn.hasClass("accept")?"accept":"reject";
+		
+		$.ajax({
+			url: getRequestUrl(18),
+			dataType : "json",
+			type: "POST",
+			data: {data : JSON.stringify(o) },
+			success: function(data) {
+				
+				if (data.result == 0) {
+					alert("Incoming stock " + o.operation + " successful.");
+					btn.parents(".cpanel.stock-inward-panel").remove();
+					if ($("#stock-inward .cpanel").length ==0 ) {
+						$("#stock-inward .cpanel-body").text("None.");
+					}
+				}
+			},
+			error: function(xhr, status, error) {
+				
+				showMessage("Error while communicating with server: " + status + ": " + error);
+				btn.text(btn.data("old-text"));
+			}
+		});
+	}
+
+</script>
